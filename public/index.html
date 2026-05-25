@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Staff Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #E8821A;
+      --primary-dark: #B45F0F;
+      --ink: #172033;
+      --muted: #64748B;
+      --line: #D9E2EF;
+      --panel: #FFFFFF;
+      --bg: #F6F8FB;
+      --admin: #4F46E5;
+      --reception: #0F766E;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(246, 248, 251, 0.96)),
+        url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d9e2ef' stroke-width='1'%3E%3Cpath d='M0 60h120M60 0v120'/%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--primary);
+      color: white;
+      font-size: 1.55rem;
+      box-shadow: 0 12px 28px rgba(232, 130, 26, 0.24);
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 2px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #22C55E;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+    }
+
+    .hero {
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.02;
+      letter-spacing: 0;
+      max-width: 760px;
+    }
+
+    .lead {
+      max-width: 700px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.65;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .dashboard-card {
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .dashboard-card:hover,
+    .dashboard-card:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
+      border-color: rgba(232, 130, 26, 0.55);
+      outline: none;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .role-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 1.75rem;
+    }
+
+    .admin-card .role-icon {
+      background: var(--admin);
+    }
+
+    .reception-card .role-icon {
+      background: var(--reception);
+    }
+
+    .role-label {
+      padding: 0.45rem 0.65rem;
+      border-radius: 999px;
+      background: #F1F5F9;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      margin-top: 24px;
+      letter-spacing: 0;
+    }
+
+    .card-copy {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-top: 28px;
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        padding: 24px 0;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-card {
+        min-height: 230px;
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">🏨</div>
+        <div>
+          <div class="brand-title">Hotel Ordering System</div>
+          <div class="brand-subtitle">Staff access portal</div>
+        </div>
+      </div>
+      <div class="status" aria-label="Server status">
+        <span class="status-dot" aria-hidden="true"></span>
+        Server Online
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>Select your dashboard</h1>
+      <p class="lead">
+        Use one shared entry point for staff operations. Choose the dashboard for your role, then enter the assigned PIN on the next screen.
+      </p>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Dashboard choices">
+      <a class="dashboard-card admin-card" href="/admin/index.html">
+        <div>
+          <div class="card-top">
+            <div class="role-icon" aria-hidden="true">⚙️</div>
+            <span class="role-label">Admin</span>
+          </div>
+          <h2 class="card-title">Admin Dashboard</h2>
+          <p class="card-copy">Manage tables, menu items, QR codes, and active order summaries.</p>
+        </div>
+        <span class="card-action">Open admin panel →</span>
+      </a>
+
+      <a class="dashboard-card reception-card" href="/receptionist/index.html">
+        <div>
+          <div class="card-top">
+            <div class="role-icon" aria-hidden="true">📞</div>
+            <span class="role-label">Reception</span>
+          </div>
+          <h2 class="card-title">Receptionist Dashboard</h2>
+          <p class="card-copy">Track table activity, receive new order alerts, and update order status.</p>
+        </div>
+        <span class="card-action">Open reception desk →</span>
+      </a>
+    </section>
+
+    <footer class="footer">
+      <span>Customer ordering remains available through table QR links.</span>
+      <span>Keep PINs private.</span>
+    </footer>
+  </main>
+</body>
+</html>

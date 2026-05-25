@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receptionist Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #E8821A;
+      --dark: #0F172A;
+      --darker: #0A0E1A;
+      --gray: #475569;
+      --light-gray: #E2E8F0;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--dark);
+      color: white;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* ==================== LOGIN SCREEN ==================== */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+      flex-direction: column;
+    }
+
+    .login-screen.hidden {
+      display: none;
+    }
+
+    .login-card {
+      background: var(--darker);
+      border: 2px solid var(--gray);
+      border-radius: 12px;
+      padding: 3rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .login-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .login-subtitle {
+      text-align: center;
+      color: var(--gray);
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .pin-display {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .pin-digit {
+      aspect-ratio: 1;
+      background: var(--dark);
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .pin-digit.filled {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .pin-key {
+      aspect-ratio: 1;
+      background: var(--dark);
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      color: white;
+      font-weight: 700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pin-key:hover {
+      background: var(--gray);
+      border-color: var(--primary);
+    }
+
+    .pin-key:active {
+      transform: scale(0.95);
+    }
+
+    .pin-backspace {
+      grid-column: span 3;
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .pin-backspace:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .login-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: #fca5a5;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    /* ==================== MAIN DASHBOARD ==================== */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      background: var(--dark);
+    }
+
+    .main-content.hidden {
+      display: none;
+    }
+
+    .top-bar {
+      background: var(--darker);
+      border-bottom: 2px solid var(--gray);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.disconnected {
+      background: var(--danger);
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .revenue-counter {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .revenue-label {
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+
+    .revenue-amount {
+      font-size: 1.3rem;
+      color: var(--success);
+    }
+
+    /* Logout button */
+    .btn-logout {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #dc2626;
+    }
+
+    /* ==================== MAIN GRID ==================== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .table-card {
+      background: var(--darker);
+      border: 2px solid var(--gray);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .table-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(232, 130, 26, 0.2);
+    }
+
+    .table-card.active {
+      border-color: var(--primary);
+      background: rgba(232, 130, 26, 0.1);
+    }
+
+    .table-card.payment-requested {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+    }
+
+    .table-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .table-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .pending-badge {
+      background: var(--warning);
+      color: var(--dark);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .pending-badge.zero {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--gray);
+    }
+
+    .payment-badge {
+      display: inline-block;
+      margin-top: 0.5rem;
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .table-info {
+      font-size: 0.85rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* ==================== SIDE PANEL ==================== */
+    .side-panel {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 400px;
+      height: 100vh;
+      background: var(--darker);
+      border-left: 2px solid var(--gray);
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s ease;
+      z-index: 100;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+    }
+
+    .side-panel.active {
+      right: 0;
+    }
+
+    .panel-header {
+      background: var(--dark);
+      border-bottom: 2px solid var(--gray);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .order-item {
+      background: var(--dark);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .order-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .order-item-name {
+      font-weight: 700;
+    }
+
+    .order-item-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+
+    .status-preparing {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    .status-served {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .order-item-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-bottom: 0.75rem;
+    }
+
+    .order-item-notes {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-bottom: 0.75rem;
+      font-style: italic;
+    }
+
+    .order-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-small {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-preparing {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid #60a5fa;
+    }
+
+    .btn-preparing:hover {
+      background: #60a5fa;
+      color: white;
+    }
+
+    .btn-served {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .btn-served:hover {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-payment {
+      width: 100%;
+      margin-bottom: 1rem;
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .payment-summary {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fecaca;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    /* ==================== NOTIFICATIONS ==================== */
+    .notification {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(232, 130, 26, 0.2);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      animation: slideIn 0.3s ease;
+      z-index: 200;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        width: 100%;
+        right: -100%;
+      }
+
+      .login-card {
+        margin: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-title">👔 Receptionist</div>
+      <div class="login-subtitle">Enter your PIN to continue</div>
+
+      <div class="login-error" id="loginError">Invalid PIN</div>
+
+      <div class="pin-display" id="pinDisplay">
+        <div class="pin-digit"></div>
+        <div class="pin-digit"></div>
+        <div class="pin-digit"></div>
+        <div class="pin-digit"></div>
+      </div>
+
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="addPinDigit('1')">1</button>
+        <button class="pin-key" onclick="addPinDigit('2')">2</button>
+        <button class="pin-key" onclick="addPinDigit('3')">3</button>
+        <button class="pin-key" onclick="addPinDigit('4')">4</button>
+        <button class="pin-key" onclick="addPinDigit('5')">5</button>
+        <button class="pin-key" onclick="addPinDigit('6')">6</button>
+        <button class="pin-key" onclick="addPinDigit('7')">7</button>
+        <button class="pin-key" onclick="addPinDigit('8')">8</button>
+        <button class="pin-key" onclick="addPinDigit('9')">9</button>
+        <button class="pin-key" onclick="addPinDigit('0')">0</button>
+        <button class="pin-key pin-backspace" onclick="removePinDigit()">← Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div class="main-content hidden" id="mainContent">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <div class="title">📞 Restaurant Orders</div>
+        <div class="connection-status">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Connected</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <div class="revenue-counter">
+          <div class="revenue-label">Today's Revenue</div>
+          <div class="revenue-amount" id="revenueAmount">₹0</div>
+        </div>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Grid of Tables -->
+    <div class="grid" id="tablesGrid"></div>
+  </div>
+
+  <!-- Side Panel -->
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <div class="panel-title" id="panelTitle">Table 1</div>
+      <button class="close-btn" onclick="closeSidePanel()">✕</button>
+    </div>
+    <div class="panel-content" id="panelContent"></div>
+  </div>
+
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    // ==================== GLOBAL STATE ====================
+    let pinInput = '';
+    let token = null;
+    let socket = null;
+    let selectedTableId = null;
+    let allTables = [];
+    let allOrders = [];
+
+    // ==================== PIN INPUT ====================
+    function addPinDigit(digit) {
+      if (pinInput.length < 4) {
+        pinInput += digit;
+        updatePinDisplay();
+
+        if (pinInput.length === 4) {
+          loginWithPin();
+        }
+      }
+    }
+
+    function removePinDigit() {
+      pinInput = '';
+      updatePinDisplay();
+      document.getElementById('loginError').classList.remove('show');
+    }
+
+    function updatePinDisplay() {
+      const display = document.getElementById('pinDisplay');
+      const digits = display.querySelectorAll('.pin-digit');
+      digits.forEach((digit, index) => {
+        digit.classList.toggle('filled', index < pinInput.length);
+        digit.textContent = index < pinInput.length ? '●' : '';
+      });
+    }
+
+    // ==================== LOGIN ====================
+    async function loginWithPin() {
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            role: 'receptionist',
+            pin: pinInput
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showLoginError();
+          pinInput = '';
+          updatePinDisplay();
+          return;
+        }
+
+        token = result.token;
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+
+        // Initialize dashboard
+        loadTables();
+        initializeSocket();
+      } catch (error) {
+        console.error('Login error:', error);
+        showLoginError();
+        pinInput = '';
+        updatePinDisplay();
+      }
+    }
+
+    function showLoginError() {
+      const error = document.getElementById('loginError');
+      error.classList.add('show');
+      setTimeout(() => error.classList.remove('show'), 2000);
+    }
+
+    function logout() {
+      token = null;
+      pinInput = '';
+      selectedTableId = null;
+      document.getElementById('mainContent').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      if (socket) socket.disconnect();
+      updatePinDisplay();
+    }
+
+    // ==================== SOCKET.IO ====================
+    function initializeSocket() {
+      socket = io();
+
+      socket.on('connect', () => {
+        console.log('Socket connected');
+        document.getElementById('statusDot').classList.remove('disconnected');
+        document.getElementById('statusText').textContent = 'Connected';
+
+        if (token) {
+          socket.emit('join_receptionist', { token });
+        }
+      });
+
+      socket.on('new_order', (data) => {
+        console.log('New order:', data);
+        playNotificationSound();
+        showNotification(`🔔 New order! Table ${data.table_id}`);
+        loadOrders();
+      });
+
+      socket.on('order_status_update', (data) => {
+        console.log('Order status updated:', data);
+        loadOrders();
+      });
+
+      socket.on('payment_requested', (data) => {
+        console.log('Payment requested:', data);
+        playNotificationSound();
+        showNotification(`💳 Payment requested: ${data.table_name || `Table ${data.table_id}`}`);
+        loadOrders();
+      });
+
+      socket.on('payment_confirmed', (data) => {
+        console.log('Payment confirmed:', data);
+        showNotification(`✅ Payment confirmed for ${data.table_name || `Table ${data.table_id}`}`);
+        loadOrders();
+      });
+
+      socket.on('disconnect', () => {
+        document.getElementById('statusDot').classList.add('disconnected');
+        document.getElementById('statusText').textContent = 'Disconnected';
+      });
+
+      socket.on('app_error', (err) => {
+        console.error('Socket error:', err);
+      });
+    }
+
+    function playNotificationSound() {
+      // Create a simple beep using Web Audio API
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      } catch (e) {
+        console.log('Audio not available');
+      }
+    }
+
+    // ==================== DATA LOADING ====================
+    async function loadTables() {
+      try {
+        const response = await fetch('/api/tables');
+        const result = await response.json();
+
+        if (!result.success) return;
+
+        allTables = result.data;
+        renderTables();
+        loadOrders();
+      } catch (error) {
+        console.error('Load tables error:', error);
+      }
+    }
+
+    async function loadOrders() {
+      try {
+        const response = await fetch('/api/orders', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!result.success) return;
+
+        allOrders = result.data;
+        renderTables();
+
+        if (selectedTableId) {
+          updateSidePanel();
+        }
+
+        // Calculate revenue
+        const revenue = allOrders
+          .filter(o => o.status === 'paid')
+          .reduce((sum, order) => {
+            const total = order.items.reduce((s, item) => s + (item.quantity * item.unit_price), 0);
+            return sum + total;
+          }, 0);
+
+        document.getElementById('revenueAmount').textContent = `₹${revenue.toFixed(0)}`;
+      } catch (error) {
+        console.error('Load orders error:', error);
+      }
+    }
+
+    // ==================== RENDERING ====================
+    function renderTables() {
+      const grid = document.getElementById('tablesGrid');
+      grid.innerHTML = '';
+
+      allTables.forEach(table => {
+        const tableOrders = allOrders.filter(o => o.table_id === table.id);
+        const pendingCount = tableOrders.filter(o => o.status !== 'served').length;
+        const paymentRequested = tableOrders.some(o => o.payment_requested_at);
+        const lastOrder = tableOrders.length > 0 ? new Date(tableOrders[0].created_at) : null;
+
+        const card = document.createElement('div');
+        card.className = `table-card ${selectedTableId === table.id ? 'active' : ''} ${paymentRequested ? 'payment-requested' : ''}`;
+        card.onclick = (event) => selectTable(table.id, event);
+
+        card.innerHTML = `
+          <div class="table-card-header">
+            <div class="table-name">${table.name}</div>
+            <div class="pending-badge ${pendingCount === 0 ? 'zero' : ''}">
+              ${pendingCount} order${pendingCount !== 1 ? 's' : ''}
+            </div>
+          </div>
+          <div class="table-info">
+            ${tableOrders.length > 0 ? `
+              <div>Active orders: ${tableOrders.length}</div>
+              <div>Last: ${formatTime(lastOrder)}</div>
+              ${paymentRequested ? '<div class="payment-badge">Payment requested</div>' : ''}
+            ` : `
+              <div style="color: var(--gray);">No orders yet</div>
+            `}
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function selectTable(tableId, event) {
+      selectedTableId = tableId;
+      document.querySelectorAll('.table-card').forEach(card => card.classList.remove('active'));
+      if (event?.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+      updateSidePanel();
+      document.getElementById('sidePanel').classList.add('active');
+    }
+
+    function updateSidePanel() {
+      const panel = document.getElementById('sidePanel');
+      const tableOrders = allOrders.filter(o => o.table_id === selectedTableId);
+      const table = allTables.find(t => t.id === selectedTableId);
+
+      document.getElementById('panelTitle').textContent = table?.name || 'Table';
+
+      const content = document.getElementById('panelContent');
+      content.innerHTML = '';
+
+      if (tableOrders.length === 0) {
+        content.innerHTML = '<div style="color: var(--gray); text-align: center; padding: 2rem;">No orders for this table</div>';
+        return;
+      }
+
+      const paymentRequested = tableOrders.some(order => order.payment_requested_at);
+      const tableTotal = tableOrders.reduce((sum, order) => {
+        return sum + order.items.reduce((itemSum, item) => itemSum + (item.quantity * item.unit_price), 0);
+      }, 0);
+
+      if (paymentRequested) {
+        const paymentBox = document.createElement('div');
+        paymentBox.className = 'payment-summary';
+        paymentBox.innerHTML = `
+          <div>Payment requested</div>
+          <div>Total due: ₹${tableTotal.toFixed(0)}</div>
+        `;
+        content.appendChild(paymentBox);
+
+        const paymentButton = document.createElement('button');
+        paymentButton.className = 'btn-payment';
+        paymentButton.textContent = 'Confirm Payment & Reset Table';
+        paymentButton.onclick = () => confirmTablePayment(selectedTableId);
+        content.appendChild(paymentButton);
+      }
+
+      tableOrders.forEach(order => {
+        order.items.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'order-item';
+          itemDiv.innerHTML = `
+            <div class="order-item-header">
+              <div class="order-item-name">${item.menu_name}</div>
+              <div class="order-item-status status-${order.status}">${order.status}</div>
+            </div>
+            <div class="order-item-details">
+              <span>Qty: ${item.quantity}</span>
+              <span>₹${(item.quantity * item.unit_price).toFixed(0)}</span>
+            </div>
+            ${item.notes ? `<div class="order-item-notes">${item.notes}</div>` : ''}
+            <div class="order-buttons">
+              ${order.status === 'pending' ? `
+                <button class="btn-small btn-preparing" onclick="updateOrderStatus(${order.id}, 'preparing')">👨‍🍳 Preparing</button>
+              ` : ''}
+              ${order.status === 'preparing' ? `
+                <button class="btn-small btn-served" onclick="updateOrderStatus(${order.id}, 'served')">✅ Served</button>
+              ` : ''}
+            </div>
+          `;
+          content.appendChild(itemDiv);
+        });
+      });
+    }
+
+    function closeSidePanel() {
+      document.getElementById('sidePanel').classList.remove('active');
+      selectedTableId = null;
+      renderTables();
+    }
+
+    // ==================== ORDER ACTIONS ====================
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        const response = await fetch(`/api/orders/${orderId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: newStatus })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showNotification(`✅ Order status updated to ${newStatus}`);
+          loadOrders();
+        }
+      } catch (error) {
+        console.error('Update status error:', error);
+        showNotification('❌ Failed to update status');
+      }
+    }
+
+    async function confirmTablePayment(tableId) {
+      if (!tableId) return;
+      if (!confirm('Confirm payment and reset this table?')) return;
+
+      try {
+        const response = await fetch(`/api/orders/table/${tableId}/confirm-payment`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showNotification(`❌ ${result.error || 'Failed to confirm payment'}`);
+          return;
+        }
+
+        showNotification('✅ Payment confirmed and table reset');
+        closeSidePanel();
+        loadOrders();
+      } catch (error) {
+        console.error('Confirm payment error:', error);
+        showNotification('❌ Failed to confirm payment');
+      }
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function showNotification(message) {
+      const notif = document.createElement('div');
+      notif.className = 'notification';
+      notif.textContent = message;
+      document.body.appendChild(notif);
+
+      setTimeout(() => {
+        notif.remove();
+      }, 3000);
+    }
+
+    function formatTime(date) {
+      if (!date) return 'N/A';
+      const now = new Date();
+      const diff = Math.floor((now - date) / 1000);
+
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+      return date.toLocaleDateString();
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Receptionist dashboard loaded');
+    });
+  </script>
+</body>
+</html>

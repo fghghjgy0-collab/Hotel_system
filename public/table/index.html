@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Restaurant - Order Now</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #E8821A;
+      --dark: #2C1810;
+      --cream: #FFF8F0;
+      --light-gray: #F5F5F5;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--cream);
+      color: var(--dark);
+    }
+
+    /* Header */
+    .header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .header-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.95;
+    }
+
+    /* Container */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1rem;
+      padding-bottom: 80px;
+    }
+
+    /* Tabs for categories */
+    .categories {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 2rem;
+      padding-bottom: 0.5rem;
+      scroll-behavior: smooth;
+    }
+
+    .category-btn {
+      flex-shrink: 0;
+      padding: 0.75rem 1.5rem;
+      border: 2px solid var(--primary);
+      background: white;
+      color: var(--primary);
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .category-btn.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .category-btn:hover {
+      background-color: var(--light-gray);
+    }
+
+    /* Menu items grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (min-width: 700px) {
+      .menu-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .menu-item {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    .menu-item-emoji {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .menu-item-photo {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      background: var(--light-gray);
+    }
+
+    .menu-item-photo-placeholder {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      background: var(--light-gray);
+      font-size: 2.5rem;
+    }
+
+    .menu-item-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .menu-item-description {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .menu-item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+
+    .menu-item-price {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--light-gray);
+      border-radius: 6px;
+      padding: 0.25rem;
+    }
+
+    .quantity-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .quantity-btn:hover {
+      opacity: 0.85;
+    }
+
+    .quantity-display {
+      width: 24px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* Sticky cart bar */
+    .cart-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 2px solid var(--primary);
+      padding: 1rem;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cart-info {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .cart-info-small {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+    .order-btn {
+      flex: 1;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .order-btn:hover {
+      background: #d47216;
+      transform: scale(1.02);
+    }
+
+    .order-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    /* Modal for order review */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--dark);
+    }
+
+    .review-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--light-gray);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .review-item-details {
+      flex: 1;
+    }
+
+    .review-item-name {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .review-item-qty {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .review-item-price {
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .review-total {
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: right;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 2px solid var(--light-gray);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-cancel {
+      background: var(--light-gray);
+      color: var(--dark);
+    }
+
+    .btn-cancel:hover {
+      background: #ddd;
+    }
+
+    .btn-confirm {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-confirm:hover {
+      background: #d47216;
+    }
+
+    /* AI Input Section */
+    .ai-section {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .ai-section-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ai-input {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .ai-input input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--light-gray);
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+    }
+
+    .ai-input input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .ai-input button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .ai-input button:hover {
+      background: #d47216;
+    }
+
+    .ai-suggestions {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .suggestion-card {
+      background: var(--light-gray);
+      padding: 0.75rem;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .suggestion-card:hover {
+      border-color: var(--primary);
+      background: #ffe8d1;
+    }
+
+    .suggestion-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .suggestion-reason {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+    /* Success message */
+    .success-message {
+      display: none;
+      background: #4CAF50;
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .success-message.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Toast notifications */
+    .toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #333;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      display: none;
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    /* Bill button */
+    .bill-link {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--dark);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .bill-link:hover {
+      background: var(--primary);
+    }
+
+    .bill-badge {
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-left: 0.5rem;
+    }
+
+    /* Empty state */
+    .empty-cart {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #999;
+    }
+
+    .empty-cart-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>🍽️ Order Your Meal</h1>
+    <div class="header-subtitle">Select items to add to your cart</div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+      ✅ Order placed! Being prepared... 🍳
+    </div>
+
+    <!-- AI Section -->
+    <div class="ai-section">
+      <div class="ai-section-title">
+        🤖 Tell AI Your Order
+      </div>
+      <div class="ai-input">
+        <input type="text" id="aiInput" placeholder="E.g., 2 momos and a lassi..." />
+        <button onclick="parseWithAI()">Send</button>
+      </div>
+      <div class="ai-suggestions" id="aiSuggestions"></div>
+    </div>
+
+    <!-- Category Buttons -->
+    <div class="categories" id="categoryContainer"></div>
+
+    <!-- Menu Grid -->
+    <div class="menu-grid" id="menuGrid">
+      <div class="empty-cart">
+        <div class="empty-cart-icon">📋</div>
+        <p>Loading menu...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Cart Bar -->
+  <div class="cart-bar">
+    <div>
+      <div class="cart-info" id="cartInfo">
+        Empty cart
+      </div>
+      <div class="cart-info-small" id="cartTotal">NPR 0</div>
+    </div>
+    <button class="order-btn" id="orderBtn" onclick="openOrderReview()" disabled>
+      Place Order
+    </button>
+  </div>
+
+  <!-- Order Review Modal -->
+  <div class="modal" id="orderModal">
+    <div class="modal-content">
+      <div class="modal-header">Order Review</div>
+      <div id="reviewItems"></div>
+      <div class="review-total" id="reviewTotal">Total: NPR 0</div>
+      <div class="modal-buttons">
+        <button class="modal-btn btn-cancel" onclick="closeOrderReview()">Cancel</button>
+        <button class="modal-btn btn-confirm" onclick="submitOrder()">Confirm Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    // ==================== GLOBAL STATE ====================
+    let cart = {}; // { menuItemId: { ...item, quantity, unit_price } }
+    let menu = {}; // { category: [...items] }
+    let currentTableId = null;
+    let totalPrice = 0;
+
+    function getValidTableId() {
+      const params = new URLSearchParams(window.location.search);
+      const tableId = Number.parseInt(params.get('table'), 10);
+      return Number.isInteger(tableId) && tableId > 0 ? tableId : null;
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Get table ID from URL
+      currentTableId = getValidTableId();
+
+      if (!currentTableId) {
+        showToast('❌ No table ID provided. Please scan the QR code.');
+        return;
+      }
+
+      // Load menu
+      loadMenu();
+
+      // Initialize Socket.IO
+      initializeSocket();
+    });
+
+    // ==================== SOCKET.IO ====================
+    function initializeSocket() {
+      const socket = io();
+
+      socket.on('connect', () => {
+        console.log('Connected to server');
+        socket.emit('join_table', { tableId: currentTableId });
+      });
+
+      socket.on('order_status_update', (data) => {
+        showToast(`📝 Order #${data.order_id} is now ${data.status}`);
+      });
+
+      socket.on('bill_updated', (data) => {
+        console.log('Bill updated:', data);
+        updateBillDisplay(data);
+      });
+
+      socket.on('disconnect', () => {
+        showToast('⚠️ Connection lost. Reconnecting...');
+      });
+
+      socket.on('reconnect', () => {
+        showToast('✅ Reconnected!');
+        socket.emit('join_table', { tableId: currentTableId });
+      });
+    }
+
+    // ==================== MENU LOADING ====================
+    async function loadMenu() {
+      try {
+        const response = await fetch('/api/menu');
+        const result = await response.json();
+
+        if (!result.success) {
+          showToast('Failed to load menu');
+          return;
+        }
+
+        menu = result.data;
+        renderMenu();
+        renderCategories();
+      } catch (error) {
+        console.error('Load menu error:', error);
+        showToast('Error loading menu');
+      }
+    }
+
+    // ==================== RENDERING ====================
+    function renderCategories() {
+      const container = document.getElementById('categoryContainer');
+      container.innerHTML = '';
+
+      const categories = Object.keys(menu).sort();
+      categories.forEach((category, index) => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${index === 0 ? 'active' : ''}`;
+        btn.textContent = category;
+        btn.onclick = () => {
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderMenu(category);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderMenu(category = null) {
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = '';
+
+      let items = [];
+      if (category) {
+        items = menu[category] || [];
+      } else {
+        items = Object.values(menu).flat();
+      }
+
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'menu-item';
+
+        const quantity = cart[item.id]?.quantity || 0;
+
+        div.innerHTML = `
+          ${renderMenuVisual(item)}
+          <div class="menu-item-name">${item.name}</div>
+          <div class="menu-item-description">${item.description || ''}</div>
+          <div class="menu-item-footer">
+            <div class="menu-item-price">₹${item.price.toFixed(0)}</div>
+            <div class="quantity-selector">
+              <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">−</button>
+              <div class="quantity-display">${quantity}</div>
+              <button class="quantity-btn" onclick="increaseQuantity(${item.id}, ${item.price})">+</button>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(div);
+      });
+    }
+
+    function renderMenuVisual(item) {
+      if (item.image_url) {
+        return `<img class="menu-item-photo" src="${item.image_url}" alt="${item.name}" loading="lazy" />`;
+      }
+
+      return `<div class="menu-item-photo-placeholder">${item.image_emoji || '🍽️'}</div>`;
+    }
+
+    // ==================== CART MANAGEMENT ====================
+    function increaseQuantity(itemId, price) {
+      if (!cart[itemId]) {
+        const item = Object.values(menu)
+          .flat()
+          .find(i => i.id === itemId);
+        
+        cart[itemId] = {
+          ...item,
+          quantity: 1,
+          unit_price: price
+        };
+      } else {
+        cart[itemId].quantity++;
+      }
+
+      updateCart();
+      renderMenu();
+    }
+
+    function decreaseQuantity(itemId) {
+      if (cart[itemId]) {
+        cart[itemId].quantity--;
+        if (cart[itemId].quantity <= 0) {
+          delete cart[itemId];
+        }
+      }
+
+      updateCart();
+      renderMenu();
+    }
+
+    function updateCart() {
+      const items = Object.values(cart);
+      const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+      totalPrice = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+
+      const cartInfo = document.getElementById('cartInfo');
+      const cartTotal = document.getElementById('cartTotal');
+      const orderBtn = document.getElementById('orderBtn');
+
+      if (itemCount === 0) {
+        cartInfo.textContent = 'Empty cart';
+        cartTotal.textContent = 'NPR 0';
+        orderBtn.disabled = true;
+      } else {
+        cartInfo.textContent = `${itemCount} item${itemCount !== 1 ? 's' : ''} in cart`;
+        cartTotal.textContent = `NPR ${totalPrice.toFixed(0)}`;
+        orderBtn.disabled = false;
+      }
+    }
+
+    // ==================== ORDER SUBMISSION ====================
+    function openOrderReview() {
+      const items = Object.values(cart);
+      if (items.length === 0) return;
+
+      const reviewItems = document.getElementById('reviewItems');
+      reviewItems.innerHTML = '';
+
+      let total = 0;
+      items.forEach(item => {
+        const subtotal = item.quantity * item.unit_price;
+        total += subtotal;
+
+        const div = document.createElement('div');
+        div.className = 'review-item';
+        div.innerHTML = `
+          <div class="review-item-details">
+            <div class="review-item-name">${item.name}</div>
+            <div class="review-item-qty">Qty: ${item.quantity}</div>
+          </div>
+          <div class="review-item-price">
+            ₹${subtotal.toFixed(0)}
+          </div>
+        `;
+        reviewItems.appendChild(div);
+      });
+
+      document.getElementById('reviewTotal').textContent = `Total: ₹${total.toFixed(0)}`;
+      document.getElementById('orderModal').classList.add('active');
+    }
+
+    function closeOrderReview() {
+      document.getElementById('orderModal').classList.remove('active');
+    }
+
+    async function submitOrder() {
+      const items = Object.values(cart).map(item => ({
+        menu_item_id: item.id,
+        quantity: item.quantity,
+        notes: ''
+      }));
+
+      try {
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            table_id: currentTableId,
+            items
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showToast(`❌ ${result.error}`);
+          return;
+        }
+
+        // Show success
+        document.getElementById('successMessage').classList.add('active');
+        setTimeout(() => {
+          document.getElementById('successMessage').classList.remove('active');
+        }, 3000);
+
+        // Clear cart
+        cart = {};
+        updateCart();
+        renderMenu();
+        closeOrderReview();
+
+        showToast('✅ Order placed!');
+      } catch (error) {
+        console.error('Submit order error:', error);
+        showToast('❌ Failed to place order');
+      }
+    }
+
+    // ==================== AI PARSING ====================
+    async function parseWithAI() {
+      const input = document.getElementById('aiInput').value.trim();
+      if (!input) return;
+
+      showToast('🤖 Parsing order...');
+
+      try {
+        const response = await fetch('/api/orders/natural-language', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            table_id: currentTableId,
+            text: input
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showToast(`❌ ${result.message}`);
+          return;
+        }
+
+        // Add items to cart
+        result.parsed.recognized.forEach(item => {
+          const menuItem = Object.values(menu)
+            .flat()
+            .find(m => m.name === item.name);
+          
+          if (menuItem) {
+            increaseQuantity(menuItem.id, menuItem.price);
+          }
+        });
+
+        document.getElementById('aiInput').value = '';
+        updateCart();
+        renderMenu();
+        showToast('✅ Items added from AI!');
+      } catch (error) {
+        console.error('AI parse error:', error);
+        showToast('❌ Error parsing order');
+      }
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function updateBillDisplay(data) {
+      // This updates the bill badge in real-time
+      console.log('Bill updated:', data);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

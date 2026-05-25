@@ -1,0 +1,30 @@
+{
+  "name": "hotel-ordering-system",
+  "version": "1.0.0",
+  "description": "Local WiFi hotel ordering system for small hotels in Nepal",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "hotel",
+    "ordering",
+    "nepal",
+    "socketio"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0",
+    "better-sqlite3": "^9.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.7.2"
+  }
+}

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Bill</title>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital@0;1&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #E8821A;
+      --dark: #2C1810;
+      --cream: #FFF8F0;
+      --border-color: #D4AF37;
+    }
+
+    body {
+      font-family: 'Libre Baskerville', serif;
+      background: linear-gradient(135deg, #f0e6d2 0%, #ede4d3 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 2rem auto;
+      background: white;
+      border: 2px solid var(--border-color);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      paper-style: "white";
+    }
+
+    /* ==================== HEADER ==================== */
+    .receipt-header {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    .hotel-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+    }
+
+    .hotel-tagline {
+      font-size: 0.9rem;
+      color: #999;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+
+    .receipt-date {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    /* ==================== TABLE INFO ==================== */
+    .table-info {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      background: rgba(232, 130, 26, 0.05);
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    .table-label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+
+    .table-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* ==================== BILL ITEMS ==================== */
+    .bill-items {
+      padding: 1.5rem 1rem;
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    .bill-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .bill-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .item-left {
+      flex: 1;
+      margin-right: 1rem;
+    }
+
+    .item-name {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .item-emoji {
+      font-size: 1.2rem;
+    }
+
+    .item-photo {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      object-fit: cover;
+      vertical-align: middle;
+      margin-right: 0.35rem;
+    }
+
+    .item-details {
+      font-size: 0.8rem;
+      color: #999;
+    }
+
+    .item-status {
+      font-size: 0.7rem;
+      margin-top: 0.25rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: #b45309;
+    }
+
+    .status-preparing {
+      background: rgba(59, 130, 246, 0.2);
+      color: #1e40af;
+    }
+
+    .status-served {
+      background: rgba(16, 185, 129, 0.2);
+      color: #065f46;
+    }
+
+    .payment-note {
+      padding: 1rem;
+      margin: 1rem;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .item-prices {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .item-qty {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+
+    .item-price {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    /* ==================== TOTALS ==================== */
+    .bill-totals {
+      padding: 1.5rem 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .total-label {
+      text-align: left;
+    }
+
+    .total-amount {
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .subtotal-row {
+      color: #666;
+    }
+
+    .vat-row {
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 0.75rem;
+    }
+
+    .grand-total {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.75rem;
+    }
+
+    .grand-total .total-amount {
+      color: var(--primary);
+    }
+
+    /* ==================== AI MESSAGE ==================== */
+    .ai-message {
+      padding: 1.5rem 1rem;
+      background: rgba(232, 130, 26, 0.05);
+      font-style: italic;
+      font-size: 0.9rem;
+      text-align: center;
+      color: #666;
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    /* ==================== FOOTER ==================== */
+    .receipt-footer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+
+    .thank-you {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .footer-text {
+      font-size: 0.8rem;
+      color: #999;
+      line-height: 1.6;
+    }
+
+    /* ==================== ACTIONS ==================== */
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 0 1rem 1rem 1rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #d47216;
+    }
+
+    .btn-secondary {
+      background: var(--dark);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #1a0f0a;
+    }
+
+    .btn-print {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: white;
+      border: 2px solid var(--dark);
+      color: var(--dark);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .btn-print:hover {
+      background: var(--dark);
+      color: white;
+    }
+
+    /* ==================== LOADING STATE ==================== */
+    .loading {
+      text-align: center;
+      padding: 3rem 1rem;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    /* ==================== EMPTY STATE ==================== */
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ==================== TOAST ==================== */
+    .toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 6px;
+      display: none;
+      animation: slideIn 0.3s ease;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ==================== PRINT STYLES ==================== */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .container {
+        max-width: 80mm;
+        margin: 0;
+        box-shadow: none;
+        border: none;
+      }
+
+      .actions {
+        display: none;
+      }
+
+      .btn {
+        display: none;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 500px) {
+      .container {
+        max-width: 100%;
+        border: 1px solid var(--border-color);
+      }
+
+      .hotel-name {
+        font-size: 1.6rem;
+      }
+
+      .actions {
+        flex-direction: column;
+        padding: 1rem;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="receipt-header">
+      <div class="hotel-name">🏨 HOTEL</div>
+      <div class="hotel-tagline">Fine Dining Experience</div>
+      <div class="receipt-date" id="receiptDate"></div>
+    </div>
+
+    <!-- Content Area -->
+    <div id="billContent">
+      <div class="loading">📋 Loading bill...</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+      <button class="btn btn-primary" id="payRequestBtn" onclick="requestToPay()">💳 Request to Pay</button>
+      <button class="btn btn-secondary" onclick="orderMore()">➕ Order More</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    // ==================== GLOBAL STATE ====================
+    let currentTableId = null;
+    let socket = null;
+    let billData = null;
+
+    function getValidTableId() {
+      const params = new URLSearchParams(window.location.search);
+      const tableId = Number.parseInt(params.get('table'), 10);
+      return Number.isInteger(tableId) && tableId > 0 ? tableId : null;
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Get table ID from URL
+      currentTableId = getValidTableId();
+
+      if (!currentTableId) {
+        showError('No table ID provided');
+        return;
+      }
+
+      // Set receipt date
+      document.getElementById('receiptDate').textContent = new Date().toLocaleString();
+
+      // Load bill
+      loadBill();
+
+      // Initialize Socket.IO
+      initializeSocket();
+    });
+
+    // ==================== SOCKET.IO ====================
+    function initializeSocket() {
+      socket = io();
+
+      socket.on('connect', () => {
+        console.log('Connected to server');
+        socket.emit('join_table', { tableId: currentTableId });
+      });
+
+      socket.on('bill_updated', (data) => {
+        console.log('Bill updated:', data);
+        loadBill();
+      });
+
+      socket.on('order_status_update', (data) => {
+        console.log('Order status updated:', data);
+        loadBill();
+      });
+
+      socket.on('payment_requested', () => {
+        loadBill();
+      });
+
+      socket.on('payment_confirmed', () => {
+        showToast('✅ Payment confirmed. Thank you!');
+        loadBill();
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected');
+      });
+    }
+
+    // ==================== DATA LOADING ====================
+    async function loadBill() {
+      try {
+        const response = await fetch(`/api/orders/table/${currentTableId}/bill-summary`);
+        const result = await response.json();
+
+        if (!result.success) {
+          showError('Failed to load bill');
+          return;
+        }
+
+        billData = result.data;
+        renderBill();
+      } catch (error) {
+        console.error('Load bill error:', error);
+        showError('Error loading bill');
+      }
+    }
+
+    // ==================== RENDERING ====================
+    function renderBill() {
+      const content = document.getElementById('billContent');
+
+      if (!billData || billData.items.length === 0) {
+        content.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">✅</div>
+            <p>No unpaid items for this table</p>
+          </div>
+        `;
+        updatePaymentButton();
+        return;
+      }
+
+      let html = `
+        <!-- Table Info -->
+        <div class="table-info">
+          <div class="table-label">Table Number</div>
+          <div class="table-number">${currentTableId}</div>
+        </div>
+
+        <!-- Bill Items -->
+        <div class="bill-items">
+      `;
+
+      billData.items.forEach(item => {
+        const subtotal = item.subtotal;
+        const statusClass = `status-${item.status}`;
+
+        html += `
+          <div class="bill-item">
+            <div class="item-left">
+              <div class="item-name">
+                <span class="item-emoji">${item.emoji || '🍽️'}</span>
+                ${item.image_url ? `<img class="item-photo" src="${item.image_url}" alt="${item.name}" loading="lazy" />` : ''}
+                ${item.name}
+              </div>
+              <div class="item-details">
+                <div class="item-qty">Qty: ${item.quantity} × ₹${item.unit_price.toFixed(0)}</div>
+                <div class="item-status ${statusClass}">${item.status}</div>
+              </div>
+            </div>
+            <div class="item-prices">
+              <div class="item-price">₹${subtotal.toFixed(0)}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+        </div>
+
+        <!-- Totals -->
+        <div class="bill-totals">
+          <div class="total-row subtotal-row">
+            <span class="total-label">Subtotal</span>
+            <span class="total-amount">₹${billData.subtotal.toFixed(0)}</span>
+          </div>
+          <div class="total-row vat-row">
+            <span class="total-label">VAT (13%)</span>
+            <span class="total-amount">₹${billData.vat.toFixed(0)}</span>
+          </div>
+          <div class="grand-total">
+            <span class="total-label">TOTAL</span>
+            <span class="total-amount">₹${billData.total.toFixed(0)}</span>
+          </div>
+        </div>
+
+        <!-- AI Message -->
+        <div class="ai-message">
+          ✨ Thank you for dining with us! We hope to serve you again soon. 🙏
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+          <div class="thank-you">THANK YOU</div>
+          <div class="footer-text">
+            <p>📍 Nepal | 📞 For Reservations Call</p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Receipt #${Date.now()}</p>
+          </div>
+        </div>
+      `;
+
+      content.innerHTML = html;
+      updatePaymentButton();
+    }
+
+    // ==================== ACTIONS ====================
+    async function requestToPay() {
+      try {
+        const button = document.getElementById('payRequestBtn');
+        button.disabled = true;
+        button.textContent = 'Sending request...';
+
+        const response = await fetch(`/api/orders/table/${currentTableId}/request-payment`, {
+          method: 'POST'
+        });
+        const result = await response.json();
+
+        if (!result.success) {
+          showToast(`❌ ${result.error || 'Failed to request payment'}`);
+          updatePaymentButton();
+          return;
+        }
+
+        showToast('📞 Payment request sent to receptionist');
+        billData.payment_requested = true;
+        billData.payment_requested_at = result.data.requested_at;
+        updatePaymentButton();
+      } catch (error) {
+        console.error('Request to pay error:', error);
+        showToast('❌ Failed to send request');
+        updatePaymentButton();
+      }
+    }
+
+    function updatePaymentButton() {
+      const button = document.getElementById('payRequestBtn');
+      if (!button) return;
+
+      const hasItems = billData && Array.isArray(billData.items) && billData.items.length > 0;
+      if (!hasItems) {
+        button.disabled = true;
+        button.textContent = 'No payment due';
+        return;
+      }
+
+      if (billData.payment_requested) {
+        button.disabled = true;
+        button.textContent = 'Payment requested';
+        return;
+      }
+
+      button.disabled = false;
+      button.textContent = '💳 Request to Pay';
+    }
+
+    function orderMore() {
+      window.location.href = `/table/index.html?table=${currentTableId}`;
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function showError(message) {
+      const content = document.getElementById('billContent');
+      content.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">❌</div>
+          <p>${message}</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

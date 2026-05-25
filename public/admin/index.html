@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #E8821A;
+      --dark: #1F2937;
+      --darker: #111827;
+      --gray: #6B7280;
+      --light-gray: #F3F4F6;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--light-gray);
+      color: var(--dark);
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ==================== LOGIN ==================== */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-screen.hidden {
+      display: none;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 3rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .login-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .login-subtitle {
+      text-align: center;
+      color: var(--gray);
+      margin-bottom: 2rem;
+    }
+
+    .pin-display {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .pin-digit {
+      aspect-ratio: 1;
+      background: var(--light-gray);
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .pin-digit.filled {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .pin-key {
+      aspect-ratio: 1;
+      background: var(--light-gray);
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pin-key:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .pin-backspace {
+      grid-column: span 3;
+      background: #EF4444;
+      border-color: #EF4444;
+      color: white;
+    }
+
+    .login-error {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    /* ==================== SIDEBAR ==================== */
+    .sidebar {
+      width: 250px;
+      background: var(--darker);
+      color: white;
+      padding: 2rem 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.hidden {
+      display: none;
+    }
+
+    .sidebar-logo {
+      padding: 0 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .nav-items {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 4px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-item:hover {
+      background: rgba(232, 130, 26, 0.1);
+      color: var(--primary);
+    }
+
+    .nav-item.active {
+      background: rgba(232, 130, 26, 0.2);
+      border-left-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .sidebar-logout {
+      padding: 1rem 1.5rem;
+      margin-top: auto;
+      background: #EF4444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .sidebar-logout:hover {
+      background: #dc2626;
+    }
+
+    /* ==================== MAIN CONTENT ==================== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    /* ==================== TABS ==================== */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ==================== TABLES TAB ==================== */
+    .tables-list {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .table-item {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .table-info {
+      flex: 1;
+    }
+
+    .table-name-input {
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 0.5rem;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .table-name-input:hover {
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .table-name-input:focus {
+      outline: none;
+      border: 2px solid var(--primary);
+      background: var(--light-gray);
+    }
+
+    .table-status-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .toggle-switch {
+      width: 40px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .toggle-switch.active .toggle-slider {
+      left: 18px;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-small {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .btn-danger {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .btn-danger:hover {
+      background: #DC2626;
+      color: white;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #d47216;
+    }
+
+    .form-section {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(232, 130, 26, 0.1);
+    }
+
+    /* ==================== MENU TAB ==================== */
+    .menu-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .menu-tab {
+      padding: 1rem 1.5rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--gray);
+      transition: all 0.2s;
+    }
+
+    .menu-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .menu-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .menu-emoji {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .menu-photo {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      background: #f3f4f6;
+    }
+
+    .menu-photo-placeholder {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      background: #f3f4f6;
+      font-size: 2rem;
+    }
+
+    .menu-name {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .menu-price {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .menu-available-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+    }
+
+    .menu-card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* ==================== QR TAB ==================== */
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .qr-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .qr-code {
+      margin: 1rem 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .qr-code img {
+      max-width: 100%;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+    }
+
+    .qr-table-name {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .qr-url {
+      font-size: 0.75rem;
+      color: var(--gray);
+      word-break: break-all;
+      margin-bottom: 1rem;
+    }
+
+    .qr-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-download {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-download:hover {
+      background: #d47216;
+    }
+
+    /* ==================== MODAL ==================== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--light-gray);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-confirm {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 900;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .menu-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+
+      .qr-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-title">⚙️ Admin Login</div>
+      <div class="login-subtitle">Enter your admin PIN</div>
+
+      <div class="login-error" id="loginError">Invalid PIN</div>
+
+      <div class="pin-display" id="pinDisplay">
+        <div class="pin-digit"></div>
+        <div class="pin-digit"></div>
+        <div class="pin-digit"></div>
+        <div class="pin-digit"></div>
+      </div>
+
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="addPinDigit('1')">1</button>
+        <button class="pin-key" onclick="addPinDigit('2')">2</button>
+        <button class="pin-key" onclick="addPinDigit('3')">3</button>
+        <button class="pin-key" onclick="addPinDigit('4')">4</button>
+        <button class="pin-key" onclick="addPinDigit('5')">5</button>
+        <button class="pin-key" onclick="addPinDigit('6')">6</button>
+        <button class="pin-key" onclick="addPinDigit('7')">7</button>
+        <button class="pin-key" onclick="addPinDigit('8')">8</button>
+        <button class="pin-key" onclick="addPinDigit('9')">9</button>
+        <button class="pin-key" onclick="addPinDigit('0')">0</button>
+        <button class="pin-key pin-backspace" onclick="removePinDigit()">← Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div class="container" id="mainContainer" style="display: none;">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-logo">🏨 Admin</div>
+      <div class="nav-items">
+        <div class="nav-item active" onclick="switchTab('tables')">📋 Tables</div>
+        <div class="nav-item" onclick="switchTab('menu')">🍽️ Menu</div>
+        <div class="nav-item" onclick="switchTab('orders')">📦 Orders</div>
+        <div class="nav-item" onclick="switchTab('qrcodes')">📱 QR Codes</div>
+      </div>
+      <button class="sidebar-logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+      <div class="header">
+        <div class="header-title" id="headerTitle">Manage Tables</div>
+      </div>
+
+      <div class="content">
+        <!-- TABLES TAB -->
+        <div class="tab-content active" id="tables-tab">
+          <div class="form-section">
+            <div class="form-title">Add New Table</div>
+            <div class="form-group">
+              <input type="text" class="form-input" id="newTableName" placeholder="E.g., Table 6" />
+              <button class="btn-primary" onclick="addTable()">Add Table</button>
+            </div>
+          </div>
+
+          <div class="tables-list" id="tablesList"></div>
+        </div>
+
+        <!-- MENU TAB -->
+        <div class="tab-content" id="menu-tab">
+          <div class="form-section">
+            <div class="form-title">Add New Item</div>
+            <div class="form-group">
+              <input type="text" class="form-input" id="menuName" placeholder="Item name" />
+              <input type="text" class="form-input" id="menuEmoji" placeholder="Emoji" />
+              <input type="number" class="form-input" id="menuPrice" placeholder="Price" style="flex: 0.5;" />
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-input" id="menuCategory" placeholder="Category" />
+              <input type="text" class="form-input" id="menuDescription" placeholder="Description" />
+            </div>
+            <div class="form-group">
+              <input type="url" class="form-input" id="menuImageUrl" placeholder="Dish photo URL" />
+              <input type="file" class="form-input" id="menuImageFile" accept="image/*" />
+              <button class="btn-primary" onclick="addMenuItem()">Add Item</button>
+            </div>
+          </div>
+
+          <div class="menu-tabs" id="categoryTabs"></div>
+          <div class="menu-grid" id="menuGrid"></div>
+        </div>
+
+        <!-- ORDERS TAB -->
+        <div class="tab-content" id="orders-tab">
+          <div id="ordersOverview"></div>
+        </div>
+
+        <!-- QR CODES TAB -->
+        <div class="tab-content" id="qrcodes-tab">
+          <div class="form-section">
+            <button class="btn-primary" onclick="generateAllQRs()" style="width: 100%; padding: 1rem;">🖨️ Print All QR Codes</button>
+          </div>
+          <div class="qr-grid" id="qrGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    // ==================== GLOBAL STATE ====================
+    let pinInput = '';
+    let token = null;
+    let allTables = [];
+    let allMenu = {};
+    let socket = null;
+
+    // ==================== PIN LOGIN ====================
+    function addPinDigit(digit) {
+      if (pinInput.length < 4) {
+        pinInput += digit;
+        updatePinDisplay();
+
+        if (pinInput.length === 4) {
+          loginWithPin();
+        }
+      }
+    }
+
+    function removePinDigit() {
+      pinInput = '';
+      updatePinDisplay();
+      document.getElementById('loginError').classList.remove('show');
+    }
+
+    function updatePinDisplay() {
+      const display = document.getElementById('pinDisplay');
+      const digits = display.querySelectorAll('.pin-digit');
+      digits.forEach((digit, index) => {
+        digit.classList.toggle('filled', index < pinInput.length);
+        digit.textContent = index < pinInput.length ? '●' : '';
+      });
+    }
+
+    async function loginWithPin() {
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            role: 'admin',
+            pin: pinInput
+          })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showLoginError();
+          pinInput = '';
+          updatePinDisplay();
+          return;
+        }
+
+        token = result.token;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainContainer').style.display = 'flex';
+
+        loadTables();
+        loadMenu();
+        initializeSocket();
+      } catch (error) {
+        console.error('Login error:', error);
+        showLoginError();
+        pinInput = '';
+        updatePinDisplay();
+      }
+    }
+
+    function showLoginError() {
+      const error = document.getElementById('loginError');
+      error.classList.add('show');
+      setTimeout(() => error.classList.remove('show'), 2000);
+    }
+
+    function logout() {
+      token = null;
+      pinInput = '';
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      if (socket) socket.disconnect();
+      updatePinDisplay();
+    }
+
+    // ==================== TAB SWITCHING ====================
+    function switchTab(tab) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      // Show selected tab
+      const tabPanel = document.getElementById(tab + '-tab');
+      if (!tabPanel) return;
+
+      tabPanel.classList.add('active');
+      const tabOrder = ['tables', 'menu', 'orders', 'qrcodes'];
+      const navItem = document.querySelectorAll('.nav-item')[tabOrder.indexOf(tab)];
+      if (navItem) {
+        navItem.classList.add('active');
+      }
+
+      // Update header
+      const titles = {
+        'tables': 'Manage Tables',
+        'menu': 'Manage Menu',
+        'orders': 'Orders Overview',
+        'qrcodes': 'QR Codes'
+      };
+      document.getElementById('headerTitle').textContent = titles[tab];
+
+      if (tab === 'qrcodes') {
+        loadQRCodes();
+      } else if (tab === 'orders') {
+        loadOrders();
+      }
+    }
+
+    // ==================== SOCKET.IO ====================
+    function initializeSocket() {
+      socket = io();
+
+      socket.on('connect', () => {
+        console.log('Socket connected');
+        if (token) {
+          socket.emit('join_admin', { token });
+        }
+      });
+
+      socket.on('tables_updated', (data) => {
+        allTables = data.tables;
+        renderTables();
+      });
+
+      socket.on('menu_updated', (data) => {
+        allMenu = data.menu;
+        renderMenu();
+      });
+    }
+
+    // ==================== TABLES ====================
+    async function loadTables() {
+      try {
+        const response = await fetch('/api/tables');
+        const result = await response.json();
+        if (result.success) {
+          allTables = result.data;
+          renderTables();
+        }
+      } catch (error) {
+        console.error('Load tables error:', error);
+      }
+    }
+
+    async function addTable() {
+      const name = document.getElementById('newTableName').value.trim();
+      if (!name) return;
+
+      try {
+        const response = await fetch('/api/tables', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          document.getElementById('newTableName').value = '';
+          loadTables();
+        }
+      } catch (error) {
+        console.error('Add table error:', error);
+      }
+    }
+
+    async function updateTableName(tableId, newName) {
+      try {
+        const response = await fetch(`/api/tables/${tableId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name: newName })
+        });
+
+        if (response.ok) {
+          loadTables();
+        }
+      } catch (error) {
+        console.error('Update table error:', error);
+      }
+    }
+
+    async function toggleTableStatus(tableId, isActive) {
+      try {
+        const response = await fetch(`/api/tables/${tableId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ is_active: isActive ? 0 : 1 })
+        });
+
+        if (response.ok) {
+          loadTables();
+        }
+      } catch (error) {
+        console.error('Toggle table status error:', error);
+      }
+    }
+
+    async function deleteTable(tableId) {
+      if (!confirm('Are you sure? This will delete the table.')) return;
+
+      try {
+        const response = await fetch(`/api/tables/${tableId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          loadTables();
+        }
+      } catch (error) {
+        console.error('Delete table error:', error);
+      }
+    }
+
+    function renderTables() {
+      const list = document.getElementById('tablesList');
+      list.innerHTML = '';
+
+      allTables.forEach(table => {
+        const div = document.createElement('div');
+        div.className = 'table-item';
+        div.innerHTML = `
+          <div class="table-info">
+            <input type="text" class="table-name-input" value="${table.name}" onblur="updateTableName(${table.id}, this.value)" />
+            <div class="table-status-toggle">
+              <div class="toggle-switch ${table.is_active ? 'active' : ''}" onclick="toggleTableStatus(${table.id}, ${table.is_active})">
+                <div class="toggle-slider"></div>
+              </div>
+              <span>${table.is_active ? 'Active' : 'Inactive'}</span>
+              ${table.pending_orders > 0 ? `<span style="color: var(--primary);">${table.pending_orders} pending</span>` : ''}
+            </div>
+          </div>
+          <div class="table-actions">
+            <button class="btn-small btn-danger" onclick="deleteTable(${table.id})">Delete</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    // ==================== MENU ====================
+    async function loadMenu() {
+      try {
+        const response = await fetch('/api/menu');
+        const result = await response.json();
+        if (result.success) {
+          allMenu = result.data;
+          renderMenuTabs();
+          renderMenu();
+        }
+      } catch (error) {
+        console.error('Load menu error:', error);
+      }
+    }
+
+    async function addMenuItem() {
+      const name = document.getElementById('menuName').value.trim();
+      const price = parseFloat(document.getElementById('menuPrice').value);
+      const category = document.getElementById('menuCategory').value.trim();
+      const description = document.getElementById('menuDescription').value.trim();
+      const emoji = document.getElementById('menuEmoji').value.trim();
+      const imageUrl = document.getElementById('menuImageUrl').value.trim();
+      const imageFile = document.getElementById('menuImageFile').files[0];
+
+      if (!name || !price || !category) return;
+
+      try {
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('price', price);
+        formData.append('category', category);
+        formData.append('description', description);
+        formData.append('image_emoji', emoji);
+        formData.append('image_url', imageUrl);
+        if (imageFile) {
+          formData.append('image_file', imageFile);
+        }
+
+        const response = await fetch('/api/menu', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.success) {
+          document.getElementById('menuName').value = '';
+          document.getElementById('menuPrice').value = '';
+          document.getElementById('menuCategory').value = '';
+          document.getElementById('menuDescription').value = '';
+          document.getElementById('menuEmoji').value = '';
+          document.getElementById('menuImageUrl').value = '';
+          document.getElementById('menuImageFile').value = '';
+          loadMenu();
+        } else {
+          alert(result.error || 'Failed to add menu item');
+        }
+      } catch (error) {
+        console.error('Add menu item error:', error);
+      }
+    }
+
+    async function deleteMenuItem(itemId) {
+      if (!confirm('Delete this item?')) return;
+
+      try {
+        const response = await fetch(`/api/menu/${itemId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          loadMenu();
+        }
+      } catch (error) {
+        console.error('Delete menu item error:', error);
+      }
+    }
+
+    function renderMenuTabs() {
+      const tabs = document.getElementById('categoryTabs');
+      tabs.innerHTML = '';
+
+      Object.keys(allMenu).sort().forEach((category, index) => {
+        const btn = document.createElement('button');
+        btn.className = `menu-tab ${index === 0 ? 'active' : ''}`;
+        btn.textContent = category;
+        btn.onclick = () => {
+          document.querySelectorAll('.menu-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderMenu(category);
+        };
+        tabs.appendChild(btn);
+      });
+    }
+
+    function renderMenu(category = null) {
+      const grid = document.getElementById('menuGrid');
+      grid.innerHTML = '';
+
+      let items = [];
+      if (category) {
+        items = allMenu[category] || [];
+      } else {
+        items = Object.values(allMenu).flat();
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'menu-card';
+        card.innerHTML = `
+          ${renderMenuVisual(item)}
+          <div class="menu-name">${item.name}</div>
+          <div class="menu-price">₹${item.price}</div>
+          <div class="menu-available-toggle">
+            <span>${item.available ? '✅ Available' : '❌ Unavailable'}</span>
+          </div>
+          <div class="menu-card-actions">
+            <button class="btn-small btn-danger" onclick="deleteMenuItem(${item.id})">Delete</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderMenuVisual(item) {
+      if (item.image_url) {
+        return `<img class="menu-photo" src="${item.image_url}" alt="${item.name}" loading="lazy" />`;
+      }
+
+      return `<div class="menu-photo-placeholder">${item.image_emoji || '🍽️'}</div>`;
+    }
+
+    // ==================== QR CODES ====================
+    async function loadQRCodes() {
+      try {
+        const response = await fetch('/api/qr/generate', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+        if (!result.success) return;
+
+        const grid = document.getElementById('qrGrid');
+        grid.innerHTML = '';
+
+        result.data.forEach(qr => {
+          const card = document.createElement('div');
+          card.className = 'qr-card';
+          card.innerHTML = `
+            <div class="qr-table-name">${qr.name}</div>
+            <div class="qr-code">
+              <img src="${qr.qrCode}" alt="${qr.name}" />
+            </div>
+            <div class="qr-url">${qr.url}</div>
+            <div class="qr-actions">
+              <button class="btn-download" onclick="downloadQR('${qr.qrCode}', '${qr.name}')">📥 Download</button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Load QR codes error:', error);
+      }
+    }
+
+    function downloadQR(dataUrl, tableName) {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${tableName}_QR.png`;
+      link.click();
+    }
+
+    function generateAllQRs() {
+      window.print();
+    }
+
+    // ==================== ORDERS ====================
+    async function loadOrders() {
+      try {
+        const response = await fetch('/api/orders', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+        if (!result.success) return;
+
+        const overview = document.getElementById('ordersOverview');
+        overview.innerHTML = `
+          <div class="form-section">
+            <div class="form-title">Active Orders Summary</div>
+            <p>Total: ${result.data.length} orders</p>
+            <p>Pending: ${result.data.filter(o => o.status === 'pending').length}</p>
+            <p>Preparing: ${result.data.filter(o => o.status === 'preparing').length}</p>
+            <p>Served: ${result.data.filter(o => o.status === 'served').length}</p>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Load orders error:', error);
+      }
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Admin panel loaded');
+    });
+  </script>
+</body>
+</html>
