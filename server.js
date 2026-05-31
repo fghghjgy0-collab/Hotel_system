@@ -16,6 +16,7 @@ import tablesRoutes from './routes/tables.js';
 import menuRoutes from './routes/menu.js';
 import ordersRoutes from './routes/orders.js';
 import qrRoutes from './routes/qr.js';
+import analyticsRoutes from './routes/analytics.js';
 
 // Get __dirname equivalent for ES modules
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -78,6 +79,7 @@ app.use('/api/tables', tablesRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/qr', qrRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 /**
  * Health check endpoint
@@ -145,6 +147,7 @@ io.on('connection', (socket) => {
       const verified = jwt.verify(token, config.jwtSecret);
       if (verified.role === 'admin') {
         socket.join('admin');
+        socket.join('receptionist');
         console.log(`⚙️ Admin joined`);
       }
     } catch (error) {

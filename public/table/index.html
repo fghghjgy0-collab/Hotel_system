@@ -522,6 +522,195 @@
       background: var(--primary);
     }
 
+    .floating-bill-btn {
+      position: fixed;
+      right: 1rem;
+      bottom: 96px;
+      z-index: 500;
+      border: none;
+      border-radius: 999px;
+      background: var(--dark);
+      color: white;
+      padding: 0.85rem 1.1rem;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+      cursor: pointer;
+    }
+
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-left: 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: livePulse 1.5s infinite;
+    }
+
+    .live-dot.offline {
+      background: #ef4444;
+      animation: none;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.45); opacity: 0.55; }
+    }
+
+    .bill-modal .modal-content {
+      max-width: 720px;
+      min-height: calc(100vh - 2rem);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bill-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .bill-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .icon-close {
+      border: none;
+      background: var(--light-gray);
+      color: var(--dark);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .bill-lines {
+      flex: 1;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .bill-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.75rem;
+      padding: 0.85rem;
+      border-radius: 8px;
+      background: var(--light-gray);
+    }
+
+    .bill-row-name {
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+    }
+
+    .bill-row-meta {
+      font-size: 0.86rem;
+      color: #666;
+    }
+
+    .status-badge {
+      display: inline-block;
+      margin-top: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-preparing { background: #dbeafe; color: #1d4ed8; }
+    .status-served { background: #dcfce7; color: #166534; }
+
+    .bill-row-total {
+      font-weight: 800;
+      color: var(--primary);
+      white-space: nowrap;
+      align-self: start;
+    }
+
+    .bill-summary {
+      border-top: 2px solid var(--light-gray);
+      margin-top: 1rem;
+      padding-top: 1rem;
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .bill-summary-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-weight: 700;
+    }
+
+    .bill-summary-line.grand {
+      font-size: 1.35rem;
+      color: var(--primary);
+    }
+
+    .payment-request-btn {
+      width: 100%;
+      margin-top: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .payment-request-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .celebration {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2500;
+      background: var(--primary);
+      color: white;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .celebration.active {
+      display: flex;
+    }
+
+    .celebration h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .celebration p {
+      font-size: 1.15rem;
+      line-height: 1.6;
+    }
+
     .bill-badge {
       background: var(--primary);
       color: white;
@@ -596,6 +785,11 @@
     </button>
   </div>
 
+  <button class="floating-bill-btn" onclick="openBillModal()">
+    🧾 My Bill
+    <span class="live-indicator"><span class="live-dot offline" id="liveDot"></span><span id="liveText">LIVE</span></span>
+  </button>
+
   <!-- Order Review Modal -->
   <div class="modal" id="orderModal">
     <div class="modal-content">
@@ -606,6 +800,34 @@
         <button class="modal-btn btn-cancel" onclick="closeOrderReview()">Cancel</button>
         <button class="modal-btn btn-confirm" onclick="submitOrder()">Confirm Order</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal bill-modal" id="billModal">
+    <div class="modal-content">
+      <div class="bill-modal-header">
+        <div>
+          <div class="bill-title">🧾 My Bill</div>
+          <div class="header-subtitle" style="color:#666;">Table <span id="billTableNumber"></span></div>
+        </div>
+        <button class="icon-close" onclick="closeBillModal()">✕</button>
+      </div>
+      <div class="bill-lines" id="billLines"></div>
+      <div class="bill-summary">
+        <div class="bill-summary-line"><span>Subtotal</span><span id="billSubtotal">NPR 0</span></div>
+        <div class="bill-summary-line"><span>VAT (13%)</span><span id="billVat">NPR 0</span></div>
+        <div class="bill-summary-line grand"><span>Grand Total</span><span id="billTotal">NPR 0</span></div>
+      </div>
+      <button class="payment-request-btn" id="paymentRequestBtn" onclick="requestPayment()">💳 Request Payment</button>
+    </div>
+  </div>
+
+  <div class="celebration" id="paymentCelebration">
+    <div>
+      <h2>✅ Payment Confirmed!</h2>
+      <p>Thank you for dining with us 🙏</p>
+      <p>Hotel Ordering System - Nepal</p>
+      <p id="celebrationTotal"></p>
     </div>
   </div>
 
@@ -621,6 +843,8 @@
     let menu = {}; // { category: [...items] }
     let currentTableId = null;
     let totalPrice = 0;
+    let socket = null;
+    let currentBill = null;
 
     function getValidTableId() {
       const params = new URLSearchParams(window.location.search);
@@ -643,14 +867,17 @@
 
       // Initialize Socket.IO
       initializeSocket();
+      loadBillSummary();
+      document.getElementById('billTableNumber').textContent = currentTableId;
     });
 
     // ==================== SOCKET.IO ====================
     function initializeSocket() {
-      const socket = io();
+      socket = io();
 
       socket.on('connect', () => {
         console.log('Connected to server');
+        document.getElementById('liveDot').classList.remove('offline');
         socket.emit('join_table', { tableId: currentTableId });
       });
 
@@ -663,7 +890,14 @@
         updateBillDisplay(data);
       });
 
+      socket.on('payment_confirmed', (data) => {
+        document.getElementById('celebrationTotal').textContent = `Final Total: ${formatMoney(data.total || currentBill?.total || 0)}`;
+        closeBillModal();
+        document.getElementById('paymentCelebration').classList.add('active');
+      });
+
       socket.on('disconnect', () => {
+        document.getElementById('liveDot').classList.add('offline');
         showToast('⚠️ Connection lost. Reconnecting...');
       });
 
@@ -842,6 +1076,58 @@
       document.getElementById('orderModal').classList.remove('active');
     }
 
+    async function loadBillSummary() {
+      if (!currentTableId) return;
+      try {
+        const response = await fetch(`/api/orders/table/${currentTableId}/bill-summary`);
+        const result = await response.json();
+        if (!result.success) {
+          showToast(result.error || 'Failed to load bill');
+          return;
+        }
+        updateBillDisplay(result.data);
+      } catch (error) {
+        console.error('Load bill error:', error);
+        showToast('❌ Could not refresh bill');
+      }
+    }
+
+    function openBillModal() {
+      document.getElementById('billModal').classList.add('active');
+      loadBillSummary();
+    }
+
+    function closeBillModal() {
+      document.getElementById('billModal').classList.remove('active');
+    }
+
+    async function requestPayment() {
+      const button = document.getElementById('paymentRequestBtn');
+      button.disabled = true;
+      button.textContent = '⏳ Sending request...';
+
+      try {
+        const response = await fetch(`/api/orders/table/${currentTableId}/request-payment`, { method: 'POST' });
+        const result = await response.json();
+
+        if (!result.success) {
+          button.disabled = false;
+          button.textContent = '💳 Request Payment';
+          showToast(`❌ ${result.error || 'Payment request failed'}`);
+          return;
+        }
+
+        button.textContent = '⏳ Payment Requested — Waiting for staff...';
+        showToast('💳 Payment request sent');
+        loadBillSummary();
+      } catch (error) {
+        console.error('Request payment error:', error);
+        button.disabled = false;
+        button.textContent = '💳 Request Payment';
+        showToast('❌ Could not request payment');
+      }
+    }
+
     async function submitOrder() {
       const items = Object.values(cart).map(item => ({
         menu_item_id: item.id,
@@ -932,8 +1218,41 @@
 
     // ==================== UTILITY FUNCTIONS ====================
     function updateBillDisplay(data) {
-      // This updates the bill badge in real-time
-      console.log('Bill updated:', data);
+      currentBill = data || { items: [], subtotal: 0, vat: 0, total: 0 };
+      const lines = document.getElementById('billLines');
+      if (!lines) return;
+
+      if (!currentBill.items || currentBill.items.length === 0) {
+        lines.innerHTML = '<div class="empty-cart"><div class="empty-cart-icon">🧾</div><p>No bill items yet</p></div>';
+      } else {
+        lines.innerHTML = currentBill.items.map(item => `
+          <div class="bill-row">
+            <div>
+              <div class="bill-row-name">${item.emoji || '🍽️'} ${item.name}</div>
+              <div class="bill-row-meta">Qty ${item.quantity} × ${formatMoney(item.unit_price)}</div>
+              <span class="status-badge status-${item.status}">${item.status}</span>
+            </div>
+            <div class="bill-row-total">${formatMoney(item.line_total || item.subtotal)}</div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('billSubtotal').textContent = formatMoney(currentBill.subtotal);
+      document.getElementById('billVat').textContent = formatMoney(currentBill.vat);
+      document.getElementById('billTotal').textContent = formatMoney(currentBill.total);
+
+      const button = document.getElementById('paymentRequestBtn');
+      if (currentBill.payment_requested) {
+        button.disabled = true;
+        button.textContent = '⏳ Payment Requested — Waiting for staff...';
+      } else {
+        button.disabled = !currentBill.items || currentBill.items.length === 0;
+        button.textContent = '💳 Request Payment';
+      }
+    }
+
+    function formatMoney(value) {
+      return `NPR ${Math.round(Number(value) || 0).toLocaleString('en-IN')}`;
     }
 
     function showToast(message) {
@@ -945,6 +1264,13 @@
         toast.classList.remove('show');
       }, 3000);
     }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeOrderReview();
+        closeBillModal();
+      }
+    });
   </script>
 </body>
 </html>

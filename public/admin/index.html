@@ -19,6 +19,7 @@
       --gray: #6B7280;
       --light-gray: #F3F4F6;
       --white: #FFFFFF;
+      --cream: #FFF8F0;
     }
 
     body {
@@ -597,6 +598,237 @@
       font-weight: 600;
     }
 
+    .modal-close {
+      float: right;
+      border: none;
+      background: var(--light-gray);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .bill-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      background: var(--light-gray);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .bill-row strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      margin-top: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-preparing { background: #dbeafe; color: #1d4ed8; }
+    .status-served { background: #dcfce7; color: #166534; }
+
+    .bill-summary-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      font-weight: 700;
+    }
+
+    .bill-grand {
+      color: var(--primary);
+      font-size: 1.3rem;
+    }
+
+    .payment-request-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .payment-request-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+      font-weight: 800;
+    }
+
+    .payment-status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      background: #f3f4f6;
+      color: var(--gray);
+    }
+
+    .payment-status-badge.requested {
+      background: rgba(232, 130, 26, 0.14);
+      color: var(--primary);
+    }
+
+    .payment-status-badge.paid {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+
+    .admin-payment-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-confirm-anytime {
+      background: #10B981;
+      color: white;
+    }
+
+    .btn-confirm-anytime.requested {
+      background: var(--primary);
+      box-shadow: 0 0 0 0 rgba(232, 130, 26, 0.55);
+      animation: adminPaymentPulse 1.4s infinite;
+    }
+
+    .btn-confirm-anytime.paid {
+      background: #9ca3af;
+      cursor: default;
+      animation: none;
+    }
+
+    @keyframes adminPaymentPulse {
+      0% { box-shadow: 0 0 0 0 rgba(232, 130, 26, 0.55); }
+      70% { box-shadow: 0 0 0 8px rgba(232, 130, 26, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(232, 130, 26, 0); }
+    }
+
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .orders-table th,
+    .orders-table td {
+      text-align: left;
+      padding: 0.85rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    #analytics-tab {
+      background: var(--cream, #FFF8F0);
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      max-width: 100%;
+    }
+
+    .kpi-card,
+    .chart-panel {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .kpi-card {
+      text-align: center;
+      border-top: 4px solid var(--primary, #E8821A);
+    }
+
+    .kpi-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .kpi-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--dark, #2C1810);
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 280px;
+      width: 100% !important;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .chart-container canvas {
+      display: block;
+      max-width: 100% !important;
+      height: 280px !important;
+    }
+
+    .analytics-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 24px;
+    }
+
+    .notification {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(232, 130, 26, 0.12);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 800;
+      z-index: 2000;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.16);
+    }
+
+    #tableUtilizationTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #tableUtilizationTable thead {
+      background: var(--primary, #E8821A);
+      color: white;
+    }
+
+    #tableUtilizationTable tbody tr:nth-child(even) {
+      background: #fafafa;
+    }
+
     /* ==================== RESPONSIVE ==================== */
     @media (max-width: 768px) {
       .sidebar {
@@ -622,6 +854,10 @@
       }
 
       .qr-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -669,6 +905,7 @@
         <div class="nav-item" onclick="switchTab('menu')">🍽️ Menu</div>
         <div class="nav-item" onclick="switchTab('orders')">📦 Orders</div>
         <div class="nav-item" onclick="switchTab('qrcodes')">📱 QR Codes</div>
+        <div class="nav-item" onclick="switchTab('analytics')">📊 Analytics</div>
       </div>
       <button class="sidebar-logout" onclick="logout()">Logout</button>
     </div>
@@ -722,6 +959,40 @@
           <div id="ordersOverview"></div>
         </div>
 
+        <!-- ANALYTICS TAB -->
+        <div class="tab-content" id="analytics-tab">
+          <div class="analytics-actions">
+            <button class="btn-primary" onclick="loadAnalytics()">🔄 Refresh</button>
+          </div>
+          <div class="analytics-grid" id="kpiGrid"></div>
+          <div class="chart-grid">
+            <div class="chart-panel">
+              <div class="form-title">Weekly Revenue</div>
+              <div class="chart-container">
+                <canvas id="weeklyRevenueChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-panel">
+              <div class="form-title">Top 5 Items</div>
+              <div class="chart-container">
+                <canvas id="topItemsChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-panel">
+              <div class="form-title">Hourly Orders</div>
+              <div class="chart-container">
+                <canvas id="hourlyOrdersChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-panel">
+              <div class="form-title">Table Utilization</div>
+              <table class="orders-table" id="tableUtilizationTable"></table>
+            </div>
+          </div>
+        </div>
+
         <!-- QR CODES TAB -->
         <div class="tab-content" id="qrcodes-tab">
           <div class="form-section">
@@ -733,8 +1004,17 @@
     </div>
   </div>
 
+  <div class="modal" id="billModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeBillModal()">✕</button>
+      <div class="modal-header" id="billModalTitle">Live Bill</div>
+      <div id="billModalBody"></div>
+    </div>
+  </div>
+
   <!-- Socket.IO -->
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
     // ==================== GLOBAL STATE ====================
@@ -743,6 +1023,12 @@
     let allTables = [];
     let allMenu = {};
     let socket = null;
+    let paymentRequests = [];
+    let paymentStatuses = {};
+    let activeTab = 'tables';
+    let activeBillTableId = null;
+    let analyticsRefreshTimer = null;
+    const chartInstances = {};
 
     // ==================== PIN LOGIN ====================
     function addPinDigit(digit) {
@@ -815,6 +1101,8 @@
     function logout() {
       token = null;
       pinInput = '';
+      stopAnalyticsAutoRefresh();
+      destroyAnalyticsCharts();
       document.getElementById('mainContainer').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
       if (socket) socket.disconnect();
@@ -832,7 +1120,8 @@
       if (!tabPanel) return;
 
       tabPanel.classList.add('active');
-      const tabOrder = ['tables', 'menu', 'orders', 'qrcodes'];
+      activeTab = tab;
+      const tabOrder = ['tables', 'menu', 'orders', 'qrcodes', 'analytics'];
       const navItem = document.querySelectorAll('.nav-item')[tabOrder.indexOf(tab)];
       if (navItem) {
         navItem.classList.add('active');
@@ -843,15 +1132,34 @@
         'tables': 'Manage Tables',
         'menu': 'Manage Menu',
         'orders': 'Orders Overview',
-        'qrcodes': 'QR Codes'
+        'qrcodes': 'QR Codes',
+        'analytics': 'Analytics'
       };
       document.getElementById('headerTitle').textContent = titles[tab];
+
+      if (tab !== 'analytics') stopAnalyticsAutoRefresh();
 
       if (tab === 'qrcodes') {
         loadQRCodes();
       } else if (tab === 'orders') {
         loadOrders();
+      } else if (tab === 'analytics') {
+        loadAnalytics();
+        startAnalyticsAutoRefresh();
       }
+    }
+
+    function startAnalyticsAutoRefresh() {
+      if (analyticsRefreshTimer) return;
+      analyticsRefreshTimer = setInterval(() => {
+        if (activeTab === 'analytics') loadAnalytics();
+      }, 60000);
+    }
+
+    function stopAnalyticsAutoRefresh() {
+      if (!analyticsRefreshTimer) return;
+      clearInterval(analyticsRefreshTimer);
+      analyticsRefreshTimer = null;
     }
 
     // ==================== SOCKET.IO ====================
@@ -873,6 +1181,21 @@
       socket.on('menu_updated', (data) => {
         allMenu = data.menu;
         renderMenu();
+      });
+
+      socket.on('payment_requested', () => {
+        if (activeTab === 'orders') loadOrders();
+      });
+
+      socket.on('payment_confirmed', () => {
+        if (activeTab === 'orders') loadOrders();
+        if (activeTab === 'analytics') loadAnalytics();
+      });
+
+      socket.on('bill_updated', (data) => {
+        if (activeBillTableId && Number(data.table_id) === Number(activeBillTableId)) {
+          renderBillModal(data.bill);
+        }
       });
     }
 
@@ -1184,15 +1507,29 @@
     // ==================== ORDERS ====================
     async function loadOrders() {
       try {
-        const response = await fetch('/api/orders', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const [ordersResponse, paymentsResponse, tablesResponse] = await Promise.all([
+          fetch('/api/orders', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }),
+          fetch('/api/orders/payment-requests', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }),
+          fetch('/api/tables')
+        ]);
 
-        const result = await response.json();
+        const result = await ordersResponse.json();
+        const paymentResult = await paymentsResponse.json();
+        const tablesResult = await tablesResponse.json();
         if (!result.success) return;
+        paymentRequests = paymentResult.success ? paymentResult.data : [];
+        if (tablesResult.success) allTables = tablesResult.data;
 
+        paymentStatuses = await loadPaymentStatuses(allTables);
+        const activeRevenue = await calculateActiveRevenue(allTables);
         const overview = document.getElementById('ordersOverview');
         overview.innerHTML = `
           <div class="form-section">
@@ -1202,11 +1539,342 @@
             <p>Preparing: ${result.data.filter(o => o.status === 'preparing').length}</p>
             <p>Served: ${result.data.filter(o => o.status === 'served').length}</p>
           </div>
+          <div class="form-section">
+            <div class="form-title">Payment Requests</div>
+            ${renderPaymentRequests()}
+          </div>
+          <div class="form-section">
+            <div class="form-title">Live Bills</div>
+            <table class="orders-table">
+              <thead>
+                <tr><th>Table</th><th>Pending</th><th>Payment</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                ${allTables.map(table => `
+                  <tr>
+                    <td>${table.name}</td>
+                    <td>${table.pending_orders || 0}</td>
+                    <td>${renderAdminPaymentStatus(table.id)}</td>
+                    <td>
+                      <div class="admin-payment-actions">
+                        <button class="btn-small btn-primary" onclick="openBillModal(${table.id}, '${escapeJsString(table.name)}')">View Live Bill</button>
+                        ${renderAdminPaymentButton(table)}
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+              <tfoot>
+                <tr><th colspan="3">Total revenue across active unpaid tables</th><th>${formatMoney(activeRevenue)}</th></tr>
+              </tfoot>
+            </table>
+          </div>
         `;
       } catch (error) {
         console.error('Load orders error:', error);
       }
     }
+
+    async function loadPaymentStatuses(tables) {
+      const entries = await Promise.all(tables.map(table =>
+        fetch(`/api/orders/table/${table.id}/payment-status`)
+          .then(response => response.json())
+          .then(result => result.success ? [table.id, result.data] : [table.id, { status: 'none', grandTotal: 0 }])
+          .catch(() => [table.id, { status: 'none', grandTotal: 0 }])
+      ));
+      return Object.fromEntries(entries);
+    }
+
+    function renderAdminPaymentStatus(tableId) {
+      const status = paymentStatuses[tableId]?.status || 'none';
+      if (status === 'requested') {
+        return '<span class="payment-status-badge requested">⚡ Payment Requested</span>';
+      }
+      if (status === 'confirmed') {
+        return '<span class="payment-status-badge paid">✅ Paid</span>';
+      }
+      return '<span class="payment-status-badge">None</span>';
+    }
+
+    function renderAdminPaymentButton(table) {
+      const status = paymentStatuses[table.id]?.status || 'none';
+      if (status === 'confirmed') {
+        return '<button class="btn-small btn-confirm-anytime paid" disabled>✅ Paid</button>';
+      }
+      const buttonClass = status === 'requested'
+        ? 'btn-small btn-confirm-anytime requested'
+        : 'btn-small btn-confirm-anytime';
+      const label = status === 'requested' ? '⚡ Confirm Payment' : '💳 Confirm Payment';
+      return `<button class="${buttonClass}" onclick="confirmPayment(${table.id}, '${escapeJsString(table.name)}')">${label}</button>`;
+    }
+
+    async function calculateActiveRevenue(tables) {
+      try {
+        const bills = await Promise.all(tables.map(table =>
+          fetch(`/api/orders/table/${table.id}/bill-summary`)
+            .then(response => response.json())
+            .then(result => result.success ? result.data.total : 0)
+            .catch(() => 0)
+        ));
+        return bills.reduce((sum, total) => sum + Number(total || 0), 0);
+      } catch (error) {
+        return 0;
+      }
+    }
+
+    function renderPaymentRequests() {
+      if (!paymentRequests.length) {
+        return '<p style="color: var(--gray);">No pending payment requests</p>';
+      }
+
+      return paymentRequests.map(request => `
+        <div class="payment-request-card">
+          <div class="payment-request-top">
+            <span>${request.table_name}</span>
+            <span>${formatMoney(request.bill.total)}</span>
+          </div>
+          <div style="color: var(--gray); margin-bottom: 0.75rem;">
+            ${request.bill.items.map(item => `${item.emoji || '🍽️'} ${item.name} × ${item.quantity}`).join(', ')}
+          </div>
+          <button class="btn-small btn-primary" onclick="confirmPayment(${request.table_id}, '${escapeJsString(request.table_name)}')">✅ Confirm Payment</button>
+        </div>
+      `).join('');
+    }
+
+    async function confirmPayment(tableId, tableName = '') {
+      try {
+        const bill = await fetchTableBill(tableId);
+        const name = tableName || `Table ${tableId}`;
+        if (!confirm(`Confirm payment for ${name}? Total: ${formatMoney(bill.total)}`)) return;
+
+        const response = await fetch(`/api/orders/table/${tableId}/confirm-payment`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+          alert(result.error || 'Failed to confirm payment');
+          return;
+        }
+        showNotification(`✅ Payment confirmed for ${name}`);
+        if (result.data?.warning) showNotification(`⚠️ ${result.data.warning}`);
+        loadOrders();
+      } catch (error) {
+        console.error('Confirm payment error:', error);
+        alert('Failed to confirm payment');
+      }
+    }
+
+    async function fetchTableBill(tableId) {
+      try {
+        const response = await fetch(`/api/orders/table/${tableId}/bill-summary`);
+        const result = await response.json();
+        return result.success ? result.data : { total: 0 };
+      } catch (error) {
+        return { total: 0 };
+      }
+    }
+
+    function showNotification(message) {
+      const notif = document.createElement('div');
+      notif.className = 'notification';
+      notif.textContent = message;
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 3000);
+    }
+
+    function escapeJsString(value) {
+      return String(value || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;');
+    }
+
+    async function openBillModal(tableId, tableName) {
+      activeBillTableId = tableId;
+      document.getElementById('billModalTitle').textContent = `${tableName} Live Bill`;
+      document.getElementById('billModalBody').innerHTML = 'Loading bill...';
+      document.getElementById('billModal').classList.add('active');
+      try {
+        const response = await fetch(`/api/orders/table/${tableId}/bill-summary`);
+        const result = await response.json();
+        if (!result.success) {
+          document.getElementById('billModalBody').textContent = result.error || 'Failed to load bill';
+          return;
+        }
+        renderBillModal(result.data);
+      } catch (error) {
+        console.error('Load bill error:', error);
+        document.getElementById('billModalBody').textContent = 'Failed to load bill';
+      }
+    }
+
+    function closeBillModal() {
+      activeBillTableId = null;
+      document.getElementById('billModal').classList.remove('active');
+    }
+
+    function renderBillModal(bill) {
+      const body = document.getElementById('billModalBody');
+      if (!bill.items.length) {
+        body.innerHTML = '<p style="color: var(--gray);">No bill items yet</p>';
+        return;
+      }
+
+      body.innerHTML = `
+        ${bill.items.map(item => `
+          <div class="bill-row">
+            <div>
+              <strong>${item.emoji || '🍽️'} ${item.name}</strong>
+              <div>Qty ${item.quantity} × ${formatMoney(item.unit_price)}</div>
+              <span class="status-badge status-${item.status}">${item.status}</span>
+            </div>
+            <strong>${formatMoney(item.line_total || item.subtotal)}</strong>
+          </div>
+        `).join('')}
+        <div class="bill-summary-line"><span>Subtotal</span><span>${formatMoney(bill.subtotal)}</span></div>
+        <div class="bill-summary-line"><span>VAT (13%)</span><span>${formatMoney(bill.vat)}</span></div>
+        <div class="bill-summary-line bill-grand"><span>Grand Total</span><span>${formatMoney(bill.total)}</span></div>
+      `;
+    }
+
+    async function loadAnalytics() {
+      try {
+        const response = await fetch('/api/analytics/summary', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (!result.success) return;
+        renderAnalytics(result.data);
+      } catch (error) {
+        console.error('Load analytics error:', error);
+      }
+    }
+
+    function renderAnalytics(data) {
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-value" id="kpi-revenue">${formatMoney(data.today_revenue)}</div>
+          <div class="kpi-label">Today's Revenue</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📦</div>
+          <div class="kpi-value" id="kpi-orders">${data.today_orders}</div>
+          <div class="kpi-label">Today's Orders</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">🧾</div>
+          <div class="kpi-value" id="kpi-average">${formatMoney(data.avg_order_value)}</div>
+          <div class="kpi-label">Avg Order Value</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">⏳</div>
+          <div class="kpi-value" id="kpi-pending">${data.pending_count}</div>
+          <div class="kpi-label">Pending Orders</div>
+        </div>
+      `;
+
+      safeCreateChart('weeklyRevenueChart', {
+        type: 'bar',
+        data: {
+        labels: data.weekly_revenue.map(item => item.date.slice(5)),
+        datasets: [{ label: 'NPR', data: data.weekly_revenue.map(item => item.revenue), backgroundColor: '#E8821A' }]
+        }
+      });
+
+      safeCreateChart('topItemsChart', {
+        type: 'bar',
+        data: {
+        labels: data.top_items.map(item => `${item.emoji || '🍽️'} ${item.name}`),
+        datasets: [{ label: 'Sold', data: data.top_items.map(item => item.quantity), backgroundColor: '#10B981' }]
+        },
+        options: { indexAxis: 'y' }
+      });
+
+      safeCreateChart('hourlyOrdersChart', {
+        type: 'line',
+        data: {
+        labels: data.hourly_breakdown.map(item => formatHour(item.hour)),
+        datasets: [{ label: 'Orders', data: data.hourly_breakdown.map(item => item.orders), borderColor: '#E8821A', backgroundColor: 'rgba(232,130,26,0.16)', tension: 0.3 }]
+        }
+      });
+
+      renderTableUtilization(data.table_utilization);
+    }
+
+    function safeCreateChart(canvasId, config) {
+      if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+        delete chartInstances[canvasId];
+      }
+
+      resetCanvas(canvasId);
+
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return null;
+
+      const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true }, x: { beginAtZero: true } }
+      };
+
+      chartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
+        ...config,
+        options: {
+          ...defaultOptions,
+          ...(config.options || {})
+        }
+      });
+
+      return chartInstances[canvasId];
+    }
+
+    function resetCanvas(canvasId) {
+      const oldCanvas = document.getElementById(canvasId);
+      if (!oldCanvas) return;
+
+      const newCanvas = document.createElement('canvas');
+      newCanvas.id = canvasId;
+      oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
+    }
+
+    function destroyAnalyticsCharts() {
+      Object.keys(chartInstances).forEach(canvasId => {
+        chartInstances[canvasId].destroy();
+        delete chartInstances[canvasId];
+      });
+    }
+
+    function renderTableUtilization(rows) {
+      const sorted = [...rows].sort((a, b) => b.revenue - a.revenue);
+      document.getElementById('tableUtilizationTable').innerHTML = `
+        <thead><tr><th>Table</th><th>Orders Today</th><th>Revenue Today</th></tr></thead>
+        <tbody>
+          ${sorted.map(row => `<tr><td>${row.name}</td><td>${row.order_count}</td><td>${formatMoney(row.revenue)}</td></tr>`).join('')}
+        </tbody>
+      `;
+    }
+
+    function formatHour(hour) {
+      if (hour === 0) return '12am';
+      if (hour < 12) return `${hour}am`;
+      if (hour === 12) return '12pm';
+      return `${hour - 12}pm`;
+    }
+
+    function formatMoney(value) {
+      return `NPR ${Math.round(Number(value) || 0).toLocaleString('en-IN')}`;
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeBillModal();
+    });
 
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', () => {

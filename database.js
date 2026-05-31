@@ -174,6 +174,7 @@ export function getTablesWithOrderCount() {
       t.name,
       t.is_active,
       COUNT(CASE WHEN o.status IN ('pending', 'preparing') THEN 1 END) as pending_orders,
+      COUNT(CASE WHEN o.payment_requested_at IS NOT NULL AND o.status != 'paid' THEN 1 END) as payment_requests,
       MAX(o.created_at) as last_order_time
     FROM hotel_tables t
     LEFT JOIN orders o ON t.id = o.table_id
@@ -193,7 +194,8 @@ export function getTableWithOrderCount(tableId) {
       t.id,
       t.name,
       t.is_active,
-      COUNT(CASE WHEN o.status IN ('pending', 'preparing') THEN 1 END) as pending_orders
+      COUNT(CASE WHEN o.status IN ('pending', 'preparing') THEN 1 END) as pending_orders,
+      COUNT(CASE WHEN o.payment_requested_at IS NOT NULL AND o.status != 'paid' THEN 1 END) as payment_requests
     FROM hotel_tables t
     LEFT JOIN orders o ON t.id = o.table_id
     WHERE t.id = ?
@@ -275,27 +277,46 @@ export function getTableOrders(tableId) {
  */
 export function calculateBillSummary(tableId) {
   const orders = getTableOrders(tableId);
-  
-  let items = [];
-  let subtotal = 0;
+
+  const grouped = new Map();
 
   orders.forEach(order => {
     order.items.forEach(item => {
-      items.push({
+      const key = `${item.menu_item_id}:${item.unit_price}:${order.status}`;
+      const existing = grouped.get(key) || {
+        menu_item_id: item.menu_item_id,
         name: item.menu_name,
-        quantity: item.quantity,
+        quantity: 0,
         unit_price: item.unit_price,
-        subtotal: item.quantity * item.unit_price,
+        line_total: 0,
+        subtotal: 0,
         status: order.status,
-        notes: item.notes,
+        notes: [],
         emoji: item.image_emoji,
         image_url: item.image_url,
+        order_ids: [],
         payment_requested_at: order.payment_requested_at
-      });
-      subtotal += item.quantity * item.unit_price;
+      };
+
+      existing.quantity += item.quantity;
+      existing.line_total += item.quantity * item.unit_price;
+      existing.subtotal = existing.line_total;
+      if (item.notes) existing.notes.push(item.notes);
+      if (!existing.order_ids.includes(order.id)) existing.order_ids.push(order.id);
+      if (!existing.payment_requested_at && order.payment_requested_at) {
+        existing.payment_requested_at = order.payment_requested_at;
+      }
+      grouped.set(key, existing);
     });
   });
 
+  const items = Array.from(grouped.values()).map(item => ({
+    ...item,
+    line_total: Math.round(item.line_total * 100) / 100,
+    subtotal: Math.round(item.subtotal * 100) / 100,
+    notes: item.notes.join('; ')
+  }));
+  const subtotal = items.reduce((sum, item) => sum + item.line_total, 0);
   const vat = subtotal * 0.13;
   const total = subtotal + vat;
 
@@ -307,6 +328,26 @@ export function calculateBillSummary(tableId) {
     payment_requested: orders.some(order => Boolean(order.payment_requested_at)),
     payment_requested_at: orders.find(order => order.payment_requested_at)?.payment_requested_at || null
   };
+}
+
+export function getPendingPaymentRequests() {
+  const rows = db.prepare(`
+    SELECT
+      o.table_id,
+      t.name as table_name,
+      MIN(o.payment_requested_at) as requested_at,
+      COUNT(o.id) as order_count
+    FROM orders o
+    JOIN hotel_tables t ON t.id = o.table_id
+    WHERE o.payment_requested_at IS NOT NULL AND o.status != 'paid'
+    GROUP BY o.table_id, t.name
+    ORDER BY requested_at ASC
+  `).all();
+
+  return rows.map(row => ({
+    ...row,
+    bill: calculateBillSummary(row.table_id)
+  }));
 }
 
 export default db;

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDatabase, getOrderWithItems, getTableOrders, calculateBillSummary, getMenuByCategory } from '../database.js';
+import { getDatabase, getOrderWithItems, getTableOrders, calculateBillSummary, getMenuByCategory, getPendingPaymentRequests } from '../database.js';
 import { requireAuth } from '../middleware/auth.js';
 import { emitTo } from '../socket.js';
 import { parseNaturalLanguageOrder, suggestMenuItems } from '../ai/claude.js';
@@ -18,6 +18,13 @@ function parsePositiveId(value) {
 function parseQuantity(value) {
   const quantity = Number.parseInt(value, 10);
   return Number.isInteger(quantity) && quantity > 0 && quantity <= 99 ? quantity : null;
+}
+
+function emitBillUpdated(tableId) {
+  const bill = calculateBillSummary(tableId);
+  emitTo(`table_${tableId}`, 'bill_updated', bill);
+  emitTo('receptionist', 'bill_updated', { table_id: tableId, bill });
+  return bill;
 }
 
 /**
@@ -92,8 +99,7 @@ router.post('/', (req, res) => {
     });
 
     const orderId = transaction();
-    // Calculate bill
-    const tableBill = calculateBillSummary(tableId);
+    const tableBill = emitBillUpdated(tableId);
 
     // Emit events
     emitTo('receptionist', 'new_order', {
@@ -102,14 +108,6 @@ router.post('/', (req, res) => {
       item_count: validatedItems.length,
       created_at: new Date().toISOString()
     });
-
-    emitTo(`table_${tableId}`, 'bill_updated', {
-  items: tableBill.items,
-  subtotal: tableBill.subtotal,
-  vat: tableBill.vat,
-  total: tableBill.total,
-  payment_requested: tableBill.payment_requested
-});
 
     res.status(201).json({
       success: true,
@@ -170,6 +168,82 @@ router.get('/table/:tableId/bill-summary', (req, res) => {
 });
 
 /**
+ * GET /api/orders/table/:tableId/payment-status
+ * Get payment status for a table
+ * Public endpoint
+ */
+router.get('/table/:tableId/payment-status', (req, res) => {
+  try {
+    const tableId = parsePositiveId(req.params.tableId);
+    if (!tableId) {
+      return res.status(400).json({ error: 'Invalid table ID' });
+    }
+
+    const counts = db.prepare(`
+      SELECT
+        COUNT(*) as total,
+        COUNT(CASE WHEN status != 'paid' THEN 1 END) as active,
+        COUNT(CASE WHEN payment_requested_at IS NOT NULL AND status != 'paid' THEN 1 END) as requested,
+        COUNT(CASE WHEN status = 'paid' AND paid_at IS NOT NULL THEN 1 END) as paid
+      FROM orders
+      WHERE table_id = ?
+    `).get(tableId);
+
+    let status = 'none';
+    if (counts.requested > 0) status = 'requested';
+    else if (counts.total > 0 && counts.active === 0 && counts.paid > 0) status = 'confirmed';
+
+    const bill = calculateBillSummary(tableId);
+    let grandTotal = bill.total;
+
+    if (status === 'confirmed') {
+      const latestPaidAt = db.prepare(`
+        SELECT MAX(paid_at) as paid_at
+        FROM orders
+        WHERE table_id = ? AND status = 'paid' AND paid_at IS NOT NULL
+      `).get(tableId)?.paid_at;
+
+      if (latestPaidAt) {
+        const lastPaidSubtotal = db.prepare(`
+          SELECT COALESCE(SUM(oi.quantity * oi.unit_price), 0) as subtotal
+          FROM orders o
+          JOIN order_items oi ON oi.order_id = o.id
+          WHERE o.table_id = ? AND o.status = 'paid' AND o.paid_at = ?
+        `).get(tableId, latestPaidAt).subtotal;
+
+        grandTotal = Math.round((lastPaidSubtotal * 1.13) * 100) / 100;
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        table_id: tableId,
+        status,
+        grandTotal
+      }
+    });
+  } catch (error) {
+    console.error('Payment status error:', error);
+    res.status(500).json({ error: 'Failed to fetch payment status' });
+  }
+});
+
+/**
+ * GET /api/orders/payment-requests
+ * Get pending payment requests
+ * Receptionist/Admin auth
+ */
+router.get('/payment-requests', requireAuth(['receptionist', 'admin']), (req, res) => {
+  try {
+    res.json({ success: true, data: getPendingPaymentRequests() });
+  } catch (error) {
+    console.error('Payment requests error:', error);
+    res.status(500).json({ error: 'Failed to fetch payment requests' });
+  }
+});
+
+/**
  * POST /api/orders/table/:tableId/request-payment
  * Customer requests receptionist payment confirmation for all unpaid table orders
  */
@@ -185,29 +259,37 @@ router.post('/table/:tableId/request-payment', (req, res) => {
       return res.status(404).json({ error: 'Table not found' });
     }
 
-    const unpaidOrders = db.prepare(`
+    const servedOrders = db.prepare(`
       SELECT id FROM orders
-      WHERE table_id = ? AND status != 'paid'
+      WHERE table_id = ? AND status = 'served'
     `).all(tableId);
+    const openKitchenOrders = db.prepare(`
+      SELECT COUNT(*) as count FROM orders
+      WHERE table_id = ? AND status IN ('pending', 'preparing')
+    `).get(tableId).count;
 
-    if (unpaidOrders.length === 0) {
-      return res.status(400).json({ error: 'No unpaid orders found for this table' });
+    if (servedOrders.length === 0) {
+      return res.status(400).json({ error: 'No served orders are ready for payment yet' });
+    }
+    if (openKitchenOrders > 0) {
+      return res.status(400).json({ error: 'Please wait until all items are served before requesting payment' });
     }
 
     const requestedAt = new Date().toISOString();
     db.prepare(`
       UPDATE orders
       SET payment_requested_at = COALESCE(payment_requested_at, ?)
-      WHERE table_id = ? AND status != 'paid'
+      WHERE table_id = ? AND status = 'served'
     `).run(requestedAt, tableId);
 
-    const bill = calculateBillSummary(tableId);
+    const bill = emitBillUpdated(tableId);
 
     emitTo('receptionist', 'payment_requested', {
       table_id: tableId,
       table_name: table.name,
-      order_count: unpaidOrders.length,
+      order_count: servedOrders.length,
       total: bill.total,
+      bill,
       requested_at: requestedAt
     });
 
@@ -222,7 +304,7 @@ router.post('/table/:tableId/request-payment', (req, res) => {
       message: 'Payment request sent to receptionist',
       data: {
         table_id: tableId,
-        order_count: unpaidOrders.length,
+        order_count: servedOrders.length,
         total: bill.total,
         requested_at: requestedAt
       }
@@ -250,8 +332,16 @@ router.post('/table/:tableId/confirm-payment', requireAuth(['receptionist', 'adm
     }
 
     const bill = calculateBillSummary(tableId);
-    if (!bill.items.length) {
-      return res.status(400).json({ error: 'No unpaid orders found for this table' });
+    const openCounts = db.prepare(`
+      SELECT
+        COUNT(*) as total,
+        COUNT(CASE WHEN status IN ('pending', 'preparing') THEN 1 END) as unfinished
+      FROM orders
+      WHERE table_id = ? AND status != 'paid'
+    `).get(tableId);
+
+    if (!bill.items.length || openCounts.total === 0) {
+      return res.status(400).json({ error: 'No open bill found for this table' });
     }
 
     const paidAt = new Date().toISOString();
@@ -261,26 +351,26 @@ router.post('/table/:tableId/confirm-payment', requireAuth(['receptionist', 'adm
       WHERE table_id = ? AND status != 'paid'
     `).run(paidAt, tableId);
 
+    const warning = openCounts.unfinished > 0
+      ? `${openCounts.unfinished} pending/preparing order(s) were also marked paid.`
+      : null;
+
     emitTo('receptionist', 'payment_confirmed', {
       table_id: tableId,
       table_name: table.name,
       paid_at: paidAt,
-      total: bill.total
+      total: bill.total,
+      warning
     });
 
     emitTo(`table_${tableId}`, 'payment_confirmed', {
       table_id: tableId,
       paid_at: paidAt,
-      total: bill.total
+      total: bill.total,
+      warning
     });
 
-    emitTo(`table_${tableId}`, 'bill_updated', {
-  items: tableBill.items,
-  subtotal: tableBill.subtotal,
-  vat: tableBill.vat,
-  total: tableBill.total,
-  payment_requested: tableBill.payment_requested
-});
+    emitBillUpdated(tableId);
 
     res.json({
       success: true,
@@ -289,7 +379,8 @@ router.post('/table/:tableId/confirm-payment', requireAuth(['receptionist', 'adm
         table_id: tableId,
         orders_paid: result.changes,
         paid_at: paidAt,
-        total: bill.total
+        total: bill.total,
+        warning
       }
     });
   } catch (error) {
@@ -394,17 +485,7 @@ router.patch('/:id/status', requireAuth(['receptionist', 'admin']), (req, res) =
       status
     });
 
-    // Update bill if status changed
-    if (status !== 'paid') {
-      const bill = calculateBillSummary(order.table_id);
-      emitTo(`table_${tableId}`, 'bill_updated', {
-  items: tableBill.items,
-  subtotal: tableBill.subtotal,
-  vat: tableBill.vat,
-  total: tableBill.total,
-  payment_requested: tableBill.payment_requested
-});
-    }
+    emitBillUpdated(order.table_id);
 
     res.json({
       success: true,
@@ -516,7 +597,7 @@ router.post('/natural-language', async (req, res) => {
     });
 
     const orderId = transaction();
-    const tableBill = calculateBillSummary(tableId);
+    const tableBill = emitBillUpdated(tableId);
 
     // Emit events
     emitTo('receptionist', 'new_order', {
@@ -525,14 +606,6 @@ router.post('/natural-language', async (req, res) => {
       item_count: validatedItems.length,
       created_at: new Date().toISOString()
     });
-
-    emitTo(`table_${tableId}`, 'bill_updated', {
-  items: tableBill.items,
-  subtotal: tableBill.subtotal,
-  vat: tableBill.vat,
-  total: tableBill.total,
-  payment_requested: tableBill.payment_requested
-});
 
     res.status(201).json({
       success: true,

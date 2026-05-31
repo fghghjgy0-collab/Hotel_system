@@ -254,6 +254,132 @@
       flex: 1;
     }
 
+    .dashboard-tabs {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem 0;
+      background: var(--dark);
+    }
+
+    .dashboard-tab {
+      border: 1px solid var(--gray);
+      background: var(--darker);
+      color: white;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .dashboard-tab.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(232, 130, 26, 0.12);
+    }
+
+    .payment-alert {
+      display: none;
+      margin: 1rem 1.5rem 0;
+      background: rgba(232, 130, 26, 0.16);
+      border: 1px solid var(--primary);
+      color: #fed7aa;
+      padding: 1rem;
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    .payment-alert.show {
+      display: block;
+    }
+
+    .payments-list {
+      display: none;
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .payments-list.active {
+      display: block;
+    }
+
+    .payment-card {
+      background: var(--darker);
+      border: 2px solid var(--gray);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .payment-card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .payment-total {
+      color: var(--success);
+      font-size: 1.35rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .payment-items {
+      color: var(--light-gray);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .btn-confirm-payment {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: var(--success);
+      color: white;
+      padding: 0.85rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .bill-card-total {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      color: var(--success);
+      font-size: 1.6rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .bill-row {
+      background: var(--dark);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .bill-row-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .bill-summary-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      color: var(--light-gray);
+      font-weight: 700;
+    }
+
     .table-card {
       background: var(--darker);
       border: 2px solid var(--gray);
@@ -443,6 +569,55 @@
       transition: all 0.2s;
     }
 
+    .btn-bill {
+      margin-top: 1rem;
+      width: 100%;
+      background: rgba(232, 130, 26, 0.16);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 0.65rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .table-payment-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-table-payment {
+      width: 100%;
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 0.65rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .btn-table-payment.requested {
+      background: var(--primary);
+      box-shadow: 0 0 0 0 rgba(232, 130, 26, 0.55);
+      animation: paymentPulse 1.4s infinite;
+    }
+
+    .btn-table-payment.paid {
+      background: #64748b;
+      cursor: default;
+      opacity: 0.75;
+      animation: none;
+    }
+
+    @keyframes paymentPulse {
+      0% { box-shadow: 0 0 0 0 rgba(232, 130, 26, 0.55); }
+      70% { box-shadow: 0 0 0 8px rgba(232, 130, 26, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(232, 130, 26, 0); }
+    }
+
     .btn-preparing {
       background: rgba(59, 130, 246, 0.2);
       color: #60a5fa;
@@ -581,8 +756,16 @@
       </div>
     </div>
 
+    <div class="payment-alert" id="paymentAlert"></div>
+
+    <div class="dashboard-tabs">
+      <button class="dashboard-tab active" id="ordersTabBtn" onclick="switchDashboardTab('orders')">📦 Orders</button>
+      <button class="dashboard-tab" id="paymentsTabBtn" onclick="switchDashboardTab('payments')">💳 Payments</button>
+    </div>
+
     <!-- Grid of Tables -->
     <div class="grid" id="tablesGrid"></div>
+    <div class="payments-list" id="paymentsList"></div>
   </div>
 
   <!-- Side Panel -->
@@ -605,6 +788,9 @@
     let selectedTableId = null;
     let allTables = [];
     let allOrders = [];
+    let paymentRequests = [];
+    let paymentStatuses = {};
+    let billPanelTableId = null;
 
     // ==================== PIN INPUT ====================
     function addPinDigit(digit) {
@@ -660,6 +846,7 @@
 
         // Initialize dashboard
         loadTables();
+        loadPaymentRequests();
         initializeSocket();
       } catch (error) {
         console.error('Login error:', error);
@@ -704,6 +891,7 @@
         playNotificationSound();
         showNotification(`🔔 New order! Table ${data.table_id}`);
         loadOrders();
+        loadPaymentRequests();
       });
 
       socket.on('order_status_update', (data) => {
@@ -714,14 +902,23 @@
       socket.on('payment_requested', (data) => {
         console.log('Payment requested:', data);
         playNotificationSound();
-        showNotification(`💳 Payment requested: ${data.table_name || `Table ${data.table_id}`}`);
+        const amount = formatMoney(data.total || data.bill?.total || 0);
+        showPaymentAlert(`💳 ${data.table_name || `Table ${data.table_id}`} has requested payment — ${amount}`);
         loadOrders();
+        loadPaymentRequests();
       });
 
       socket.on('payment_confirmed', (data) => {
         console.log('Payment confirmed:', data);
         showNotification(`✅ Payment confirmed for ${data.table_name || `Table ${data.table_id}`}`);
         loadOrders();
+        loadPaymentRequests();
+      });
+
+      socket.on('bill_updated', (data) => {
+        if (billPanelTableId && Number(data.table_id) === Number(billPanelTableId)) {
+          renderBillPanel(data.bill);
+        }
       });
 
       socket.on('disconnect', () => {
@@ -767,7 +964,9 @@
 
         allTables = result.data;
         renderTables();
+        loadPaymentStatuses();
         loadOrders();
+        loadPaymentRequests();
       } catch (error) {
         console.error('Load tables error:', error);
       }
@@ -787,6 +986,7 @@
 
         allOrders = result.data;
         renderTables();
+        loadPaymentStatuses();
 
         if (selectedTableId) {
           updateSidePanel();
@@ -806,6 +1006,39 @@
       }
     }
 
+    async function loadPaymentRequests() {
+      if (!token) return;
+      try {
+        const response = await fetch('/api/orders/payment-requests', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (!result.success) return;
+        paymentRequests = result.data;
+        renderPayments();
+        renderTables();
+        loadPaymentStatuses();
+      } catch (error) {
+        console.error('Load payment requests error:', error);
+      }
+    }
+
+    async function loadPaymentStatuses() {
+      if (!allTables.length) return;
+      try {
+        const statuses = await Promise.all(allTables.map(table =>
+          fetch(`/api/orders/table/${table.id}/payment-status`)
+            .then(response => response.json())
+            .then(result => result.success ? [table.id, result.data] : [table.id, { status: 'none', grandTotal: 0 }])
+            .catch(() => [table.id, { status: 'none', grandTotal: 0 }])
+        ));
+        paymentStatuses = Object.fromEntries(statuses);
+        renderTables();
+      } catch (error) {
+        console.error('Load payment statuses error:', error);
+      }
+    }
+
     // ==================== RENDERING ====================
     function renderTables() {
       const grid = document.getElementById('tablesGrid');
@@ -814,7 +1047,10 @@
       allTables.forEach(table => {
         const tableOrders = allOrders.filter(o => o.table_id === table.id);
         const pendingCount = tableOrders.filter(o => o.status !== 'served').length;
-        const paymentRequested = tableOrders.some(o => o.payment_requested_at);
+        const statusInfo = paymentStatuses[table.id] || {};
+        const paymentRequested = statusInfo.status === 'requested' || tableOrders.some(o => o.payment_requested_at);
+        const paymentConfirmed = statusInfo.status === 'confirmed' && tableOrders.length === 0;
+        const request = paymentRequests.find(item => item.table_id === table.id);
         const lastOrder = tableOrders.length > 0 ? new Date(tableOrders[0].created_at) : null;
 
         const card = document.createElement('div');
@@ -832,15 +1068,28 @@
             ${tableOrders.length > 0 ? `
               <div>Active orders: ${tableOrders.length}</div>
               <div>Last: ${formatTime(lastOrder)}</div>
-              ${paymentRequested ? '<div class="payment-badge">Payment requested</div>' : ''}
+              ${paymentRequested ? '<div class="payment-badge">⚡ Payment Requested</div>' : ''}
             ` : `
-              <div style="color: var(--gray);">No orders yet</div>
+              <div style="color: var(--gray);">${paymentConfirmed ? 'Bill paid' : 'No orders yet'}</div>
             `}
+            <div class="table-payment-actions">
+              <button class="btn-bill" onclick="openBillPanel(${table.id}, event)">🧾 Bill</button>
+              ${renderTablePaymentButton(table, paymentRequested, paymentConfirmed)}
+            </div>
           </div>
         `;
 
         grid.appendChild(card);
       });
+    }
+
+    function renderTablePaymentButton(table, paymentRequested, paymentConfirmed) {
+      if (paymentConfirmed) {
+        return '<button class="btn-table-payment paid" disabled>✅ Paid</button>';
+      }
+      const buttonClass = paymentRequested ? 'btn-table-payment requested' : 'btn-table-payment';
+      const label = paymentRequested ? '⚡ Payment Requested · Confirm' : '💳 Confirm Payment';
+      return `<button class="${buttonClass}" onclick="confirmTablePayment(${table.id}, event)">${label}</button>`;
     }
 
     function selectTable(tableId, event) {
@@ -851,6 +1100,64 @@
       }
       updateSidePanel();
       document.getElementById('sidePanel').classList.add('active');
+    }
+
+    function switchDashboardTab(tab) {
+      const showPayments = tab === 'payments';
+      document.getElementById('tablesGrid').style.display = showPayments ? 'none' : 'grid';
+      document.getElementById('paymentsList').classList.toggle('active', showPayments);
+      document.getElementById('ordersTabBtn').classList.toggle('active', !showPayments);
+      document.getElementById('paymentsTabBtn').classList.toggle('active', showPayments);
+      if (showPayments) loadPaymentRequests();
+    }
+
+    async function openBillPanel(tableId, event) {
+      if (event) event.stopPropagation();
+      selectedTableId = tableId;
+      billPanelTableId = tableId;
+      const table = allTables.find(t => t.id === tableId);
+      document.getElementById('panelTitle').textContent = `${table?.name || 'Table'} Bill`;
+      document.getElementById('panelContent').innerHTML = '<div style="color: var(--gray); text-align:center; padding:2rem;">Loading bill...</div>';
+      document.getElementById('sidePanel').classList.add('active');
+      try {
+        const response = await fetch(`/api/orders/table/${tableId}/bill-summary`);
+        const result = await response.json();
+        if (!result.success) {
+          showNotification(`❌ ${result.error || 'Failed to load bill'}`);
+          return;
+        }
+        renderBillPanel(result.data);
+      } catch (error) {
+        console.error('Load bill error:', error);
+        showNotification('❌ Failed to load bill');
+      }
+    }
+
+    function renderBillPanel(bill) {
+      const content = document.getElementById('panelContent');
+      if (!bill || !bill.items || bill.items.length === 0) {
+        content.innerHTML = '<div style="color: var(--gray); text-align: center; padding: 2rem;">No bill items yet</div>';
+        return;
+      }
+
+      content.innerHTML = `
+        <div class="bill-card-total">${formatMoney(bill.total)}</div>
+        ${bill.items.map(item => `
+          <div class="bill-row">
+            <div class="bill-row-top">
+              <span>${item.emoji || '🍽️'} ${item.name}</span>
+              <span>${formatMoney(item.line_total || item.subtotal)}</span>
+            </div>
+            <div class="order-item-details">
+              <span>Qty ${item.quantity} × ${formatMoney(item.unit_price)}</span>
+              <span class="order-item-status status-${item.status}">${item.status}</span>
+            </div>
+          </div>
+        `).join('')}
+        <div class="bill-summary-line"><span>Subtotal</span><span>${formatMoney(bill.subtotal)}</span></div>
+        <div class="bill-summary-line"><span>VAT (13%)</span><span>${formatMoney(bill.vat)}</span></div>
+        <div class="bill-summary-line"><span>Grand Total</span><span>${formatMoney(bill.total)}</span></div>
+      `;
     }
 
     function updateSidePanel() {
@@ -873,21 +1180,19 @@
         return sum + order.items.reduce((itemSum, item) => itemSum + (item.quantity * item.unit_price), 0);
       }, 0);
 
-      if (paymentRequested) {
-        const paymentBox = document.createElement('div');
-        paymentBox.className = 'payment-summary';
-        paymentBox.innerHTML = `
-          <div>Payment requested</div>
-          <div>Total due: ₹${tableTotal.toFixed(0)}</div>
-        `;
-        content.appendChild(paymentBox);
+      const paymentBox = document.createElement('div');
+      paymentBox.className = 'payment-summary';
+      paymentBox.innerHTML = `
+        <div>${paymentRequested ? '⚡ Payment requested' : 'Payment can be confirmed anytime'}</div>
+        <div>Total due: ${formatMoney(tableTotal * 1.13)}</div>
+      `;
+      content.appendChild(paymentBox);
 
-        const paymentButton = document.createElement('button');
-        paymentButton.className = 'btn-payment';
-        paymentButton.textContent = 'Confirm Payment & Reset Table';
-        paymentButton.onclick = () => confirmTablePayment(selectedTableId);
-        content.appendChild(paymentButton);
-      }
+      const paymentButton = document.createElement('button');
+      paymentButton.className = 'btn-payment';
+      paymentButton.textContent = paymentRequested ? 'Confirm Payment & Reset Table' : '💳 Confirm Payment';
+      paymentButton.onclick = () => confirmTablePayment(selectedTableId);
+      content.appendChild(paymentButton);
 
       tableOrders.forEach(order => {
         order.items.forEach(item => {
@@ -920,7 +1225,32 @@
     function closeSidePanel() {
       document.getElementById('sidePanel').classList.remove('active');
       selectedTableId = null;
+      billPanelTableId = null;
       renderTables();
+    }
+
+    function renderPayments() {
+      const list = document.getElementById('paymentsList');
+      if (!paymentRequests.length) {
+        list.innerHTML = '<div style="color: var(--gray); text-align:center; padding:3rem;">No pending payment requests</div>';
+        return;
+      }
+
+      list.innerHTML = paymentRequests.map(request => `
+        <div class="payment-card">
+          <div class="payment-card-header">
+            <div>
+              <div class="table-name">${request.table_name}</div>
+              <div class="table-info">Requested ${formatTime(new Date(request.requested_at))}</div>
+            </div>
+            <div class="payment-total">${formatMoney(request.bill.total)}</div>
+          </div>
+          <div class="payment-items">
+            ${request.bill.items.map(item => `${item.emoji || '🍽️'} ${item.name} × ${item.quantity}`).join('<br>')}
+          </div>
+          <button class="btn-confirm-payment" onclick="confirmTablePayment(${request.table_id})">✅ Confirm Payment</button>
+        </div>
+      `).join('');
     }
 
     // ==================== ORDER ACTIONS ====================
@@ -947,9 +1277,12 @@
       }
     }
 
-    async function confirmTablePayment(tableId) {
+    async function confirmTablePayment(tableId, event) {
+      if (event) event.stopPropagation();
       if (!tableId) return;
-      if (!confirm('Confirm payment and reset this table?')) return;
+      const table = allTables.find(item => Number(item.id) === Number(tableId));
+      const bill = await fetchTableBill(tableId);
+      if (!confirm(`Confirm payment for ${table?.name || `Table ${tableId}`}? Total: ${formatMoney(bill.total)}`)) return;
 
       try {
         const response = await fetch(`/api/orders/table/${tableId}/confirm-payment`, {
@@ -966,12 +1299,25 @@
           return;
         }
 
-        showNotification('✅ Payment confirmed and table reset');
+        showNotification(`✅ Payment confirmed for ${table?.name || `Table ${tableId}`}`);
+        if (result.data?.warning) showNotification(`⚠️ ${result.data.warning}`);
         closeSidePanel();
         loadOrders();
+        loadPaymentRequests();
+        loadPaymentStatuses();
       } catch (error) {
         console.error('Confirm payment error:', error);
         showNotification('❌ Failed to confirm payment');
+      }
+    }
+
+    async function fetchTableBill(tableId) {
+      try {
+        const response = await fetch(`/api/orders/table/${tableId}/bill-summary`);
+        const result = await response.json();
+        return result.success ? result.data : { total: 0 };
+      } catch (error) {
+        return { total: 0 };
       }
     }
 
@@ -985,6 +1331,17 @@
       setTimeout(() => {
         notif.remove();
       }, 3000);
+    }
+
+    function showPaymentAlert(message) {
+      const alert = document.getElementById('paymentAlert');
+      alert.textContent = message;
+      alert.classList.add('show');
+      setTimeout(() => alert.classList.remove('show'), 7000);
+    }
+
+    function formatMoney(value) {
+      return `NPR ${Math.round(Number(value) || 0).toLocaleString('en-IN')}`;
     }
 
     function formatTime(date) {
@@ -1001,6 +1358,10 @@
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', () => {
       console.log('Receptionist dashboard loaded');
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeSidePanel();
     });
   </script>
 </body>
